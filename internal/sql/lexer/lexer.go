@@ -2,7 +2,7 @@ package lexer
 
 import (
 	"fmt"
-	token2 "mintsql/internal/sql/token"
+	"mintsql/internal/sql/token"
 	"strings"
 	"unicode"
 	"unicode/utf8"
@@ -19,38 +19,20 @@ type Cursor struct {
 type Lexer struct {
 	Name   string
 	Input  string
-	Tokens chan token2.Token
+	Tokens chan token.Token
 	State  LexFn
 
 	Cursor
-	token2.Location
+	token.Location
 }
 
-func (l *Lexer) Emit(kind token2.Kind) {
-	l.Tokens <- token2.Token{
+func (l *Lexer) Emit(kind token.Kind) {
+	l.Tokens <- token.Token{
 		Kind:     kind,
 		Value:    l.Input[l.Start:l.Pos],
 		Location: l.Location,
 	}
 	l.Start = l.Pos
-}
-
-func (l *Lexer) Inc() {
-	l.Pos++
-	l.Column++
-	if l.Pos >= len(l.Input) {
-		l.Emit(token2.KindEof)
-	}
-}
-
-func (l *Lexer) Dec() {
-	l.Pos--
-	l.Column--
-}
-
-func (l *Lexer) Backup() {
-	l.Pos -= l.Width
-	l.Column -= l.Width
 }
 
 func (l *Lexer) Current() string {
@@ -61,17 +43,22 @@ func (l *Lexer) Remainder() string {
 	return l.Input[l.Pos:]
 }
 
+func (l *Lexer) Backup() {
+	l.Pos -= l.Width
+	l.Column -= l.Width
+}
+
 func (l *Lexer) Next() rune {
 	if l.Pos >= len(l.Input) {
 		l.Width = 0
-		return token2.EOF
+		return token.EOF
 	}
 
 	res, width := utf8.DecodeRuneInString(l.Input[l.Pos:])
 	l.Width = width
 	l.Pos += l.Width
 	l.Column++
-	if res == token2.Newline {
+	if res == token.Newline {
 		l.Line++
 		l.Column = 0
 	}
@@ -111,49 +98,38 @@ func (l *Lexer) AcceptMany(valid string) {
 	l.Backup()
 }
 
-func (l *Lexer) IsNewLine() bool {
-	c, _ := utf8.DecodeRuneInString(l.Input[l.Pos : l.Pos+1])
-	return c == token2.Newline
-}
-
-func (l *Lexer) SkipNewLine() {
-	for {
-		c := l.Next()
-		if c == token2.EOF {
-			l.Emit(token2.KindEof)
-			break
-		}
-		if c == token2.Newline {
-			l.Line++
-			l.Column = 0
-		} else {
-			l.Dec()
-			break
-		}
-	}
-}
-
 func (l *Lexer) SkipWhiteSpace() {
 	for {
 		c := l.Next()
-		if c == token2.EOF {
-			l.Emit(token2.KindEof)
+		if c == token.EOF {
+			l.Emit(token.KindEof)
 			break
 		}
 		if !unicode.IsSpace(c) {
-			l.Dec()
+			l.Backup()
 			break
 		}
 	}
 }
 
 func (l *Lexer) Errorf(format string, args ...interface{}) LexFn {
-	l.Tokens <- token2.Token{
-		Kind:     token2.KindError,
+	l.Tokens <- token.Token{
+		Kind:     token.KindError,
 		Value:    fmt.Sprintf(format, args...),
 		Location: l.Location,
 	}
 	return nil
+}
+
+func (l *Lexer) NextToken() token.Token {
+	for {
+		select {
+		case t := <-l.Tokens:
+			return t
+		default:
+			l.State = l.State(l)
+		}
+	}
 }
 
 func (l *Lexer) Shutdown() {
