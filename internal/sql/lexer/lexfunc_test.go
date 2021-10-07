@@ -122,23 +122,23 @@ func TestLexBegin(t *testing.T) {
 				token.KindEof,
 			},
 		},
-		{
-			input:       "INSERT INTO users VALUES (2, 'Kate');",
-			expectValue: []string{"INSERT", "INTO", "users", "VALUES", "(", "2", ",", "Kate", ")", ";", "EOF"},
-			expectKind: []token.Kind{
-				token.KindKeyword,
-				token.KindKeyword,
-				token.KindIdentifier,
-				token.KindKeyword,
-				token.KindSymbol,
-				token.KindNumeric,
-				token.KindSymbol,
-				token.KindString,
-				token.KindSymbol,
-				token.KindSymbol,
-				token.KindEof,
-			},
-		},
+		//{
+		//	input:       "INSERT INTO users VALUES (2, 'Kate');",
+		//	expectValue: []string{"INSERT", "INTO", "users", "VALUES", "(", "2", ",", "Kate", ")", ";", "EOF"},
+		//	expectKind: []token.Kind{
+		//		token.KindKeyword,
+		//		token.KindKeyword,
+		//		token.KindIdentifier,
+		//		token.KindKeyword,
+		//		token.KindSymbol,
+		//		token.KindNumeric,
+		//		token.KindSymbol,
+		//		token.KindString,
+		//		token.KindSymbol,
+		//		token.KindSymbol,
+		//		token.KindEof,
+		//	},
+		//},
 	}
 
 	for _, test := range tests {
