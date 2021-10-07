@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	Newline rune = 10
+	NEWLINE rune = 10
 	EOF     rune = 0
 )
 
@@ -63,7 +63,7 @@ func (l *Lexer) Backup() {
 	}
 	l.Cursor.Pos -= l.Cursor.Width
 	l.Location.Column--
-	if res, _ := utf8.DecodeRuneInString(l.Input[l.Pos : l.Pos+l.Width]); res == Newline {
+	if res, _ := utf8.DecodeRuneInString(l.Input[l.Pos : l.Pos+l.Width]); res == NEWLINE {
 		l.Location.Line--
 		l.Location.Column = l.Cursor.LastLineLength
 	}

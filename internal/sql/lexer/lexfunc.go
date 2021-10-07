@@ -2,7 +2,6 @@ package lexer
 
 import (
 	"mintsql/internal/sql/token"
-	"strconv"
 	"strings"
 	"unicode"
 )
@@ -25,7 +24,7 @@ var keywords = []string{
 func LexBegin(l *Lexer) LexFn {
 	for {
 		switch nxt := l.Next(); {
-		case nxt == Newline:
+		case nxt == NEWLINE:
 			l.Location.Line++
 			l.Ignore()
 		case unicode.IsSpace(nxt):
@@ -84,9 +83,6 @@ func LexString(l *Lexer) LexFn {
 	for c := l.Next(); !unicode.IsControl(c); c = l.Next() {
 		if c == '\'' || c == '"' {
 			l.Backup()
-			if _, err := strconv.Unquote(l.Current()); err != nil {
-				break
-			}
 			l.Emit(token.KindString)
 			l.Next()
 			l.Ignore()

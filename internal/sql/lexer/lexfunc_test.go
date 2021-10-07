@@ -1,12 +1,11 @@
 package lexer
 
 import (
-	"fmt"
 	"mintsql/internal/sql/token"
 	"testing"
 )
 
-func TestLexDigits(t *testing.T) {
+func TestLexNumeric(t *testing.T) {
 	tests := []struct {
 		input       string
 		expectValue []string
@@ -102,6 +101,67 @@ func TestLexDigits(t *testing.T) {
 	}
 }
 
+func TestLexString(t *testing.T) {
+	tests := []struct {
+		input       string
+		expectValue []string
+		expectKind  []token.Kind
+	}{
+		{
+			input:       "'abc'",
+			expectValue: []string{"abc", "EOF"},
+			expectKind:  []token.Kind{token.KindString, token.KindEof},
+		},
+		{
+			input:       "\"abc\"",
+			expectValue: []string{"abc", "EOF"},
+			expectKind:  []token.Kind{token.KindString, token.KindEof},
+		},
+		{
+			input:       "''",
+			expectValue: []string{"", "EOF"},
+			expectKind:  []token.Kind{token.KindString, token.KindEof},
+		},
+		{
+			input:       "\"\"",
+			expectValue: []string{"", "EOF"},
+			expectKind:  []token.Kind{token.KindString, token.KindEof},
+		},
+		{
+			input:       "'",
+			expectValue: []string{""},
+			expectKind:  []token.Kind{token.KindError},
+		},
+		{
+			input:       "\"",
+			expectValue: []string{""},
+			expectKind:  []token.Kind{token.KindError},
+		},
+		{
+			input:       "abc",
+			expectValue: []string{""},
+			expectKind:  []token.Kind{token.KindError},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.input, func(t *testing.T) {
+			lexer := New(test.input, LexString)
+			go lexer.Run()
+			tk := lexer.NextToken()
+			for i := 0; tk != nil; i++ {
+				if tk.Value != test.expectValue[i] || tk.Kind != test.expectKind[i] {
+					t.Errorf(
+						"expected '%s' of kind %d, got '%v' of kind %d",
+						test.expectValue[i], test.expectKind[i], tk.Value, tk.Kind,
+					)
+				}
+				tk = lexer.NextToken()
+			}
+		})
+	}
+}
+
 func TestLexBegin(t *testing.T) {
 	tests := []struct {
 		input       string
@@ -147,7 +207,6 @@ func TestLexBegin(t *testing.T) {
 			go lexer.Run()
 			tk := lexer.NextToken()
 			for i := 0; tk != nil; i++ {
-				fmt.Println(tk)
 				if tk.Value != test.expectValue[i] || tk.Kind != test.expectKind[i] {
 					t.Errorf(
 						"expected '%s' of kind %d, got '%v' of kind %d",
