@@ -1,16 +1,16 @@
 package token
 
-type keyword string
+type Keyword string
 
 const (
-	Select keyword = "select"
-	From   keyword = "from"
-	As     keyword = "as"
-	Table  keyword = "table"
-	Create keyword = "create"
-	Insert keyword = "insert"
-	Into   keyword = "into"
-	Values keyword = "values"
-	Int    keyword = "int"
-	Text   keyword = "text"
+	Select Keyword = "select"
+	From   Keyword = "from"
+	As     Keyword = "as"
+	Table  Keyword = "table"
+	Create Keyword = "create"
+	Insert Keyword = "insert"
+	Into   Keyword = "into"
+	Values Keyword = "values"
+	Int    Keyword = "int"
+	Text   Keyword = "text"
 )

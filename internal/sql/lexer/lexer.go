@@ -1,25 +1,29 @@
 package lexer
 
 import (
-	"fmt"
 	"mintsql/internal/sql/token"
+	"os"
 	"strings"
-	"unicode"
 	"unicode/utf8"
+)
+
+const (
+	Newline rune = 10
+	EOF     rune = 0
 )
 
 type LexFn func(*Lexer) LexFn
 
 type Cursor struct {
-	Start int
-	Pos   int
-	Width int
+	Start          int
+	Pos            int
+	Width          int
+	LastLineLength int
 }
 
 type Lexer struct {
-	Name   string
 	Input  string
-	Tokens chan token.Token
+	Tokens chan *token.Token
 	State  LexFn
 
 	Cursor
@@ -27,11 +31,15 @@ type Lexer struct {
 }
 
 func (l *Lexer) Emit(kind token.Kind) {
-	l.Tokens <- token.Token{
+	newToken := &token.Token{
 		Kind:     kind,
 		Value:    l.Input[l.Start:l.Pos],
 		Location: l.Location,
 	}
+	if kind == token.KindEof {
+		newToken.Value = "EOF"
+	}
+	l.Tokens <- newToken
 	l.Start = l.Pos
 }
 
@@ -43,25 +51,32 @@ func (l *Lexer) Remainder() string {
 	return l.Input[l.Pos:]
 }
 
+//func (l *Lexer) Revert() {
+//	l.Pos = l.Start
+//	l.Width = 0
+//	l.Column
+//}
+
 func (l *Lexer) Backup() {
-	l.Pos -= l.Width
-	l.Column -= l.Width
+	if l.Cursor.Pos <= l.Cursor.Start {
+		return
+	}
+	l.Cursor.Pos -= l.Cursor.Width
+	l.Location.Column--
+	if res, _ := utf8.DecodeRuneInString(l.Input[l.Pos : l.Pos+l.Width]); res == Newline {
+		l.Location.Line--
+		l.Location.Column = l.Cursor.LastLineLength
+	}
 }
 
-func (l *Lexer) Next() rune {
-	if l.Pos >= len(l.Input) {
-		l.Width = 0
-		return token.EOF
+func (l *Lexer) Next() (res rune) {
+	if l.Cursor.Pos >= len(l.Input) {
+		l.Cursor.Width = 0
+		return EOF
 	}
-
-	res, width := utf8.DecodeRuneInString(l.Input[l.Pos:])
-	l.Width = width
-	l.Pos += l.Width
-	l.Column++
-	if res == token.Newline {
-		l.Line++
-		l.Column = 0
-	}
+	res, l.Cursor.Width = utf8.DecodeRuneInString(l.Remainder())
+	l.Cursor.Pos += l.Cursor.Width
+	l.Location.Column++
 	return res
 }
 
@@ -75,60 +90,44 @@ func (l *Lexer) Ignore() {
 	l.Start = l.Pos
 }
 
-func (l *Lexer) IsEOF() bool {
-	return l.Pos >= len(l.Input)
-}
-
-func (l *Lexer) IsWhiteSpace() bool {
-	c, _ := utf8.DecodeRuneInString(l.Input[l.Pos:])
-	return unicode.IsSpace(c)
-}
-
-func (l *Lexer) Accept(valid string) bool {
-	if strings.IndexRune(valid, l.Next()) >= 0 {
+func (l *Lexer) AcceptOne(valid string) bool {
+	if strings.ContainsRune(valid, l.Next()) {
 		return true
 	}
 	l.Backup()
 	return false
 }
 
-func (l *Lexer) AcceptMany(valid string) {
-	for strings.IndexRune(valid, l.Next()) >= 0 {
+func (l *Lexer) AcceptMany(valid string) (len int) {
+	for strings.ContainsRune(valid, l.Next()) {
+		len++
 	}
 	l.Backup()
+	return len
 }
 
-func (l *Lexer) SkipWhiteSpace() {
-	for {
-		c := l.Next()
-		if c == token.EOF {
-			l.Emit(token.KindEof)
-			break
-		}
-		if !unicode.IsSpace(c) {
-			l.Backup()
-			break
-		}
-	}
-}
-
-func (l *Lexer) Errorf(format string, args ...interface{}) LexFn {
-	l.Tokens <- token.Token{
+func (l *Lexer) Error() LexFn {
+	l.Tokens <- &token.Token{
 		Kind:     token.KindError,
-		Value:    fmt.Sprintf(format, args...),
+		Value:    l.Current(),
 		Location: l.Location,
 	}
 	return nil
 }
 
-func (l *Lexer) NextToken() token.Token {
-	for {
-		select {
-		case t := <-l.Tokens:
-			return t
-		default:
-			l.State = l.State(l)
-		}
+func (l *Lexer) NextToken() *token.Token {
+	t, ok := <-l.Tokens
+	if ok {
+		return t
+	}
+	return nil
+}
+
+func (l *Lexer) Run() {
+	defer func() {
+		l.Shutdown()
+	}()
+	for ; l.State != nil; l.State = l.State(l) {
 	}
 }
 
@@ -136,9 +135,26 @@ func (l *Lexer) Shutdown() {
 	close(l.Tokens)
 }
 
-func (l *Lexer) Run(init LexFn) {
-	defer l.Shutdown()
-	for st := init; st != nil; {
-		st = st(l)
+func New(src string, init LexFn) *Lexer {
+	return &Lexer{
+		Input:    src,
+		Tokens:   make(chan *token.Token, len(src)/2),
+		State:    init,
+		Cursor:   Cursor{},
+		Location: token.Location{Line: 1},
+	}
+}
+
+func NewFromFile(path string, init LexFn) *Lexer {
+	src, err := os.ReadFile(path)
+	if err != nil {
+		panic(err)
+	}
+	return &Lexer{
+		Input:    string(src),
+		Tokens:   make(chan *token.Token, len(src)/2),
+		State:    init,
+		Cursor:   Cursor{},
+		Location: token.Location{Line: 1},
 	}
 }

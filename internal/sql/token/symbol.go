@@ -8,6 +8,4 @@ const (
 	Comma      symbol = ","
 	LeftParen  symbol = "("
 	RightParen symbol = ")"
-	Newline    rune   = 10
-	EOF        rune   = 0
 )
