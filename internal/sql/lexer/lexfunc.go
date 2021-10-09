@@ -6,106 +6,106 @@ import (
 	"unicode"
 )
 
-func LexBegin(l *Lexer) LexFn {
+func lexBegin(l *Lexer) LexFn {
 	for {
-		switch nxt := l.Next(); {
+		switch nxt := l.next(); {
 		case nxt == NEWLINE:
-			l.Location.Line++
-			l.Ignore()
+			l.location.Line++
+			l.ignore()
 		case unicode.IsSpace(nxt):
-			l.Ignore()
+			l.ignore()
 		case nxt == '.' || unicode.IsDigit(nxt):
-			l.Backup()
-			return LexNumeric(l)
+			l.backup()
+			return lexNumeric(l)
 		case nxt == '\'' || nxt == '"':
-			l.Backup()
-			return LexString(l)
+			l.backup()
+			return lexString(l)
 		case unicode.IsLetter(nxt):
-			l.Backup()
-			return LexKeyword(l)
+			l.backup()
+			return lexKeyword(l)
 		case nxt == '_':
-			l.Backup()
-			return LexIdentifier(l)
+			l.backup()
+			return lexIdentifier(l)
 		case strings.ContainsRune(token.Symbols, nxt):
-			l.Backup()
-			return LexSymbol(l)
+			l.backup()
+			return lexSymbol(l)
 		case nxt == EOF:
-			l.Emit(token.KindEof)
+			l.emit(token.KindEof)
 			return nil
 		}
 	}
 }
 
-func LexNumeric(l *Lexer) LexFn {
+func lexNumeric(l *Lexer) LexFn {
 	digits := "1234567890"
-	if l.AcceptManyIn(digits) > 0 {
-		l.AcceptOneIn(".")
-		l.AcceptManyIn(digits)
-	} else if l.AcceptOneIn(".") > 0 {
-		if l.AcceptManyIn(digits) == 0 {
-			return l.Err("bad numeric")
+	if l.acceptManyIn(digits) > 0 {
+		l.acceptOneIn(".")
+		l.acceptManyIn(digits)
+	} else if l.acceptOneIn(".") > 0 {
+		if l.acceptManyIn(digits) == 0 {
+			return l.err("bad numeric")
 		}
 	} else {
-		return l.Err("bad numeric")
+		return l.err("bad numeric")
 	}
-	if l.AcceptOneIn("eE") < 0 {
-		l.Emit(token.KindNumeric)
-		return LexBegin
+	if l.acceptOneIn("eE") < 0 {
+		l.emit(token.KindNumeric)
+		return lexBegin
 	}
-	l.AcceptOneIn("+-")
-	if l.AcceptManyIn(digits) > 0 {
-		l.Emit(token.KindNumeric)
-		return LexBegin
+	l.acceptOneIn("+-")
+	if l.acceptManyIn(digits) > 0 {
+		l.emit(token.KindNumeric)
+		return lexBegin
 	}
-	return l.Err("bad numeric")
+	return l.err("bad numeric")
 }
 
-func LexString(l *Lexer) LexFn {
-	if l.AcceptOneIn("'\"") < 0 {
-		return l.Err("bad string")
+func lexString(l *Lexer) LexFn {
+	if l.acceptOneIn("'\"") < 0 {
+		return l.err("bad string")
 	}
-	l.Ignore()
-	for c := l.Next(); !unicode.IsControl(c); c = l.Next() {
+	l.ignore()
+	for c := l.next(); !unicode.IsControl(c); c = l.next() {
 		if c == '\\' {
-			if r := l.Peek(); r == '\'' || r == '"' {
-				l.Next()
+			if r := l.peek(); r == '\'' || r == '"' {
+				l.next()
 				continue
 			}
 		}
 		if c == '\'' || c == '"' {
-			if r := l.Peek(); r == c {
-				l.Next()
+			if r := l.peek(); r == c {
+				l.next()
 				continue
 			}
-			l.Backup()
-			l.Emit(token.KindString)
-			l.Next()
-			l.Ignore()
-			return LexBegin
+			l.backup()
+			l.emit(token.KindString)
+			l.next()
+			l.ignore()
+			return lexBegin
 		}
 	}
-	return l.Err("bad string")
+	return l.err("bad string")
 }
 
-func LexIdentifier(l *Lexer) LexFn {
-	if l.AcceptOneIf(func(r rune) bool { return r == '_' || unicode.IsLetter(r) }) < 0 {
-		return l.Err("bad identifier")
+func lexIdentifier(l *Lexer) LexFn {
+	if l.acceptOneIf(func(r rune) bool { return r == '_' || unicode.IsLetter(r) }) < 0 {
+		return l.err("bad identifier")
 	}
-	l.AcceptManyIf(func(r rune) bool { return r == '_' || unicode.IsLetter(r) || unicode.IsDigit(r) })
-	l.Emit(token.KindIdentifier)
-	return LexBegin
+	l.acceptManyIf(func(r rune) bool { return r == '_' || unicode.IsLetter(r) || unicode.IsDigit(r) })
+	l.emit(token.KindIdentifier)
+	return lexBegin
 }
 
-func LexSymbol(l *Lexer) LexFn {
-	if l.AcceptOneIn(token.Symbols) > 0 {
-		l.Emit(token.KindSymbol)
-		return LexBegin
+func lexSymbol(l *Lexer) LexFn {
+	if l.acceptOneIn(token.Symbols) > 0 {
+		l.emit(token.KindSymbol)
+		return lexBegin
 	}
-	return l.Err("unrecognizable symbol")
+	return l.err("unrecognizable symbol")
 }
 
-func LexKeyword(l *Lexer) LexFn {
-	c := l.Next()
+func lexKeyword(l *Lexer) LexFn {
+	c := l.next()
 	var match string
 	candidates := token.Keywords
 
@@ -126,13 +126,13 @@ func LexKeyword(l *Lexer) LexFn {
 			break
 		}
 		candidates = newCandidates
-		c = l.Next()
+		c = l.next()
 	}
-	l.Backup()
+	l.backup()
 
 	if match != "" {
-		l.Emit(token.KindKeyword)
-		return LexBegin
+		l.emit(token.KindKeyword)
+		return lexBegin
 	}
-	return LexIdentifier
+	return lexIdentifier
 }

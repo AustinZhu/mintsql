@@ -1,16 +1,21 @@
 package ast
 
-import "mintsql/internal/sql/token"
-
 type SelectStmt struct {
-	items []*Expr
-	from  token.Token
+	Items []*Expr
+	From  string
 }
 
 type InsertStmt struct {
-	table  token.Token
-	values []*Expr
+	Table  string
+	Values []*Expr
+}
+
+type ColumnDef struct {
+	Name     string
+	DataType string
 }
 
 type CreateTableStmt struct {
+	Name string
+	Cols []*ColumnDef
 }

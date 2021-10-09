@@ -82,7 +82,7 @@ func TestLexNumeric(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.input, func(t *testing.T) {
-			lexer := New(test.input, LexNumeric)
+			lexer := withState(test.input, lexNumeric)
 			go lexer.Run()
 			tk := lexer.NextToken()
 			for i := 0; tk != nil; i++ {
@@ -155,7 +155,7 @@ func TestLexString(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.input, func(t *testing.T) {
-			lexer := New(test.input, LexString)
+			lexer := withState(test.input, lexString)
 			go lexer.Run()
 			tk := lexer.NextToken()
 			for i := 0; tk != nil; i++ {
@@ -213,7 +213,7 @@ func TestLexKeyword(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.input, func(t *testing.T) {
-			lexer := New(test.input, LexKeyword)
+			lexer := withState(test.input, lexKeyword)
 			go lexer.Run()
 			tk := lexer.NextToken()
 			for i := 0; tk != nil; i++ {
@@ -261,7 +261,7 @@ func TestLexSymbol(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.input, func(t *testing.T) {
-			lexer := New(test.input, LexSymbol)
+			lexer := withState(test.input, lexSymbol)
 			go lexer.Run()
 			tk := lexer.NextToken()
 			for i := 0; tk != nil; i++ {
@@ -314,7 +314,7 @@ func TestLexIdentifier(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.input, func(t *testing.T) {
-			lexer := New(test.input, LexIdentifier)
+			lexer := withState(test.input, lexIdentifier)
 			go lexer.Run()
 			tk := lexer.NextToken()
 			for i := 0; tk != nil; i++ {
@@ -389,7 +389,7 @@ func TestLexBegin(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.input, func(t *testing.T) {
-			lexer := New(test.input, LexBegin)
+			lexer := withState(test.input, lexBegin)
 			go lexer.Run()
 			tk := lexer.NextToken()
 			for i := 0; tk != nil; i++ {

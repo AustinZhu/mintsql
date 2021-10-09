@@ -3,7 +3,6 @@ package lexer
 import (
 	"errors"
 	"mintsql/internal/sql/token"
-	"os"
 	"strings"
 	"unicode/utf8"
 )
@@ -15,134 +14,129 @@ const (
 
 type LexFn func(*Lexer) LexFn
 
-type Cursor struct {
-	Start          int
-	Pos            int
-	Width          int
+type cursor struct {
+	start          int
+	pos            int
+	width          int
 	lastLineLength int
 }
 
 type Lexer struct {
-	Input  string
-	Tokens chan *token.Token
-	State  LexFn
+	input  string
+	tokens chan *token.Token
+	state  LexFn
 	Error  error
 
-	Cursor
-	token.Location
+	cursor
+	location token.Location
 }
 
-func (l *Lexer) Emit(kind token.Kind) {
+func (l *Lexer) emit(kind token.Kind) {
 	newToken := &token.Token{
 		Kind:     kind,
-		Value:    l.Input[l.Start:l.Pos],
-		Location: l.Location,
+		Value:    l.input[l.start:l.pos],
+		Location: l.location,
 	}
-	l.Tokens <- newToken
-	l.Start = l.Pos
+	l.tokens <- newToken
+	l.start = l.pos
 }
 
-func (l *Lexer) Current() string {
-	return l.Input[l.Start:l.Pos]
+func (l *Lexer) current() string {
+	return l.input[l.start:l.pos]
 }
 
-func (l *Lexer) Remainder() string {
-	return l.Input[l.Pos:]
+func (l *Lexer) remainder() string {
+	return l.input[l.pos:]
 }
 
-func (l *Lexer) Last() rune {
-	res, _ := utf8.DecodeRuneInString(l.Input[l.Pos-l.Width : l.Pos])
-	return res
-}
-
-func (l *Lexer) Backup() {
-	if l.Cursor.Pos > l.Cursor.Start {
-		l.Cursor.Pos -= l.Cursor.Width
-		l.Location.Column--
-		if res, _ := utf8.DecodeRuneInString(l.Input[l.Pos:]); res == NEWLINE {
-			l.Location.Line--
-			l.Location.Column = l.Cursor.lastLineLength
+func (l *Lexer) backup() {
+	if l.cursor.pos > l.cursor.start {
+		l.cursor.pos -= l.cursor.width
+		l.location.Column--
+		if res, _ := utf8.DecodeRuneInString(l.input[l.pos:]); res == NEWLINE {
+			l.location.Line--
+			l.location.Column = l.cursor.lastLineLength
 		}
 	}
 }
 
-func (l *Lexer) Next() (res rune) {
-	if l.Cursor.Pos >= len(l.Input) {
-		l.Cursor.Width = 0
+func (l *Lexer) next() (res rune) {
+	if l.cursor.pos >= len(l.input) {
+		l.cursor.width = 0
 		return EOF
 	}
-	res, l.Cursor.Width = utf8.DecodeRuneInString(l.Input[l.Pos:])
-	l.Cursor.Pos += l.Cursor.Width
-	l.Location.Column++
+	res, l.cursor.width = utf8.DecodeRuneInString(l.input[l.pos:])
+	l.cursor.pos += l.cursor.width
+	l.location.Column++
 	return res
 }
 
-func (l *Lexer) Peek() rune {
-	if l.Cursor.Pos >= len(l.Input) {
+func (l *Lexer) peek() rune {
+	if l.cursor.pos >= len(l.input) {
 		return EOF
 	}
-	c, _ := utf8.DecodeRuneInString(l.Input[l.Pos:])
+	c, _ := utf8.DecodeRuneInString(l.input[l.pos:])
 	return c
 }
 
-func (l *Lexer) Ignore() {
-	l.Start = l.Pos
+func (l *Lexer) ignore() {
+	l.start = l.pos
 }
 
-func (l *Lexer) AcceptOneIf(pred func(rune) bool) rune {
-	r := l.Next()
+func (l *Lexer) acceptOneIf(pred func(rune) bool) rune {
+	r := l.next()
 	if pred(r) {
 		return r
 	}
-	l.Backup()
+	l.backup()
 	return -1
 }
 
-func (l *Lexer) AcceptManyIf(pred func(rune) bool) (len int) {
-	r := l.Next()
-	for ; pred(r); r = l.Next() {
+func (l *Lexer) acceptManyIf(pred func(rune) bool) (len int) {
+	r := l.next()
+	for ; pred(r); r = l.next() {
 		len++
 	}
-	l.Backup()
+	l.backup()
 	return len
 }
 
-func (l *Lexer) AcceptOneIn(domain string) rune {
-	r := l.Next()
+func (l *Lexer) acceptOneIn(domain string) rune {
+	r := l.next()
 	if strings.ContainsRune(domain, r) {
 		return r
 	}
-	l.Backup()
+	l.backup()
 	return -1
 }
 
-func (l *Lexer) AcceptManyIn(domain string) (len int) {
-	r := l.Next()
-	for ; strings.ContainsRune(domain, r); r = l.Next() {
+func (l *Lexer) acceptManyIn(domain string) (len int) {
+	r := l.next()
+	for ; strings.ContainsRune(domain, r); r = l.next() {
 		len++
 	}
-	l.Backup()
+	l.backup()
 	return len
 }
 
-func (l *Lexer) Err(msg string) LexFn {
-	l.Emit(token.KindError)
+func (l *Lexer) err(msg string) LexFn {
+	l.emit(token.KindError)
 	l.Error = errors.New(msg)
 	return nil
 }
 
 func (l *Lexer) NextToken() *token.Token {
-	t, ok := <-l.Tokens
+	t, ok := <-l.tokens
 	if ok {
 		return t
 	}
 	return nil
 }
 
-func (l *Lexer) Try(funcs ...LexFn) {
+func (l *Lexer) try(funcs ...LexFn) {
 	for _, f := range funcs {
 		lex := *l
-		lex.State = f
+		lex.state = f
 		go lex.Run()
 		if l.Error == nil {
 			*l = lex
@@ -153,36 +147,32 @@ func (l *Lexer) Try(funcs ...LexFn) {
 
 func (l *Lexer) Run() {
 	defer func() {
-		l.Shutdown()
+		l.shutdown()
 	}()
-	for ; l.State != nil; l.State = l.State(l) {
+	for ; l.state != nil; l.state = l.state(l) {
 	}
 }
 
-func (l *Lexer) Shutdown() {
-	close(l.Tokens)
+func (l *Lexer) shutdown() {
+	close(l.tokens)
 }
 
-func New(src string, init LexFn) *Lexer {
+func New(src string) *Lexer {
 	return &Lexer{
-		Input:    src,
-		Tokens:   make(chan *token.Token, len(src)/2),
-		State:    init,
-		Cursor:   Cursor{},
-		Location: token.Location{Line: 1},
+		input:    src,
+		tokens:   make(chan *token.Token, len(src)/2),
+		state:    lexBegin,
+		cursor:   cursor{},
+		location: token.Location{Line: 1},
 	}
 }
 
-func NewFromFile(path string, init LexFn) *Lexer {
-	src, err := os.ReadFile(path)
-	if err != nil {
-		panic(err)
-	}
+func withState(src string, fn LexFn) *Lexer {
 	return &Lexer{
-		Input:    string(src),
-		Tokens:   make(chan *token.Token, len(src)/2),
-		State:    init,
-		Cursor:   Cursor{},
-		Location: token.Location{Line: 1},
+		input:    src,
+		tokens:   make(chan *token.Token, len(src)/2),
+		state:    fn,
+		cursor:   cursor{},
+		location: token.Location{Line: 1},
 	}
 }
