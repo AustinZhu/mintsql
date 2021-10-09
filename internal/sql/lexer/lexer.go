@@ -1,6 +1,7 @@
 package lexer
 
 import (
+	"errors"
 	"mintsql/internal/sql/token"
 	"os"
 	"strings"
@@ -18,13 +19,14 @@ type Cursor struct {
 	Start          int
 	Pos            int
 	Width          int
-	LastLineLength int
+	lastLineLength int
 }
 
 type Lexer struct {
 	Input  string
 	Tokens chan *token.Token
 	State  LexFn
+	Error  error
 
 	Cursor
 	token.Location
@@ -35,9 +37,6 @@ func (l *Lexer) Emit(kind token.Kind) {
 		Kind:     kind,
 		Value:    l.Input[l.Start:l.Pos],
 		Location: l.Location,
-	}
-	if kind == token.KindEof {
-		newToken.Value = "EOF"
 	}
 	l.Tokens <- newToken
 	l.Start = l.Pos
@@ -58,14 +57,13 @@ func (l *Lexer) Remainder() string {
 //}
 
 func (l *Lexer) Backup() {
-	if l.Cursor.Pos <= l.Cursor.Start {
-		return
-	}
-	l.Cursor.Pos -= l.Cursor.Width
-	l.Location.Column--
-	if res, _ := utf8.DecodeRuneInString(l.Input[l.Pos : l.Pos+l.Width]); res == NEWLINE {
-		l.Location.Line--
-		l.Location.Column = l.Cursor.LastLineLength
+	if l.Cursor.Pos > l.Cursor.Start {
+		l.Cursor.Pos -= l.Cursor.Width
+		l.Location.Column--
+		if res, _ := utf8.DecodeRuneInString(l.Input[l.Pos : l.Pos+l.Width]); res == NEWLINE {
+			l.Location.Line--
+			l.Location.Column = l.Cursor.lastLineLength
+		}
 	}
 }
 
@@ -74,7 +72,7 @@ func (l *Lexer) Next() (res rune) {
 		l.Cursor.Width = 0
 		return EOF
 	}
-	res, l.Cursor.Width = utf8.DecodeRuneInString(l.Remainder())
+	res, l.Cursor.Width = utf8.DecodeRuneInString(l.Input[l.Pos:])
 	l.Cursor.Pos += l.Cursor.Width
 	l.Location.Column++
 	return res
@@ -106,12 +104,9 @@ func (l *Lexer) AcceptMany(valid string) (len int) {
 	return len
 }
 
-func (l *Lexer) Error() LexFn {
-	l.Tokens <- &token.Token{
-		Kind:     token.KindError,
-		Value:    l.Current(),
-		Location: l.Location,
-	}
+func (l *Lexer) Err(msg string) LexFn {
+	l.Emit(token.KindError)
+	l.Error = errors.New(msg)
 	return nil
 }
 
@@ -121,6 +116,18 @@ func (l *Lexer) NextToken() *token.Token {
 		return t
 	}
 	return nil
+}
+
+func (l *Lexer) Try(funcs ...LexFn) {
+	for _, f := range funcs {
+		lex := *l
+		lex.State = f
+		go lex.Run()
+		if l.Error == nil {
+			*l = lex
+			break
+		}
+	}
 }
 
 func (l *Lexer) Run() {

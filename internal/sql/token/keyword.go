@@ -3,14 +3,27 @@ package token
 type Keyword string
 
 const (
-	Select Keyword = "select"
-	From   Keyword = "from"
-	As     Keyword = "as"
-	Table  Keyword = "table"
-	Create Keyword = "create"
-	Insert Keyword = "insert"
-	Into   Keyword = "into"
-	Values Keyword = "values"
-	Int    Keyword = "int"
-	Text   Keyword = "text"
+	SELECT Keyword = "select"
+	FROM   Keyword = "from"
+	AS     Keyword = "as"
+	TABLE  Keyword = "table"
+	CREATE Keyword = "create"
+	INSERT Keyword = "insert"
+	INTO   Keyword = "into"
+	VALUES Keyword = "values"
+	INT    Keyword = "int"
+	TEXT   Keyword = "text"
 )
+
+var Keywords = []string{
+	string(AS),
+	string(FROM),
+	string(CREATE),
+	string(INSERT),
+	string(INT),
+	string(SELECT),
+	string(INTO),
+	string(TABLE),
+	string(TEXT),
+	string(VALUES),
+}

@@ -6,21 +6,6 @@ import (
 	"unicode"
 )
 
-const symbols = ";*,()"
-
-var keywords = []string{
-	string(token.As),
-	string(token.From),
-	string(token.Create),
-	string(token.Insert),
-	string(token.Int),
-	string(token.Select),
-	string(token.Into),
-	string(token.Table),
-	string(token.Text),
-	string(token.Values),
-}
-
 func LexBegin(l *Lexer) LexFn {
 	for {
 		switch nxt := l.Next(); {
@@ -37,11 +22,11 @@ func LexBegin(l *Lexer) LexFn {
 			return LexString(l)
 		case unicode.IsLetter(nxt):
 			l.Backup()
-			return LexKeyword(l) // -> LexIdentifier
+			return LexKeyword(l)
 		case nxt == '_':
 			l.Backup()
 			return LexIdentifier(l)
-		case strings.ContainsRune(symbols, nxt):
+		case strings.ContainsRune(token.Symbols, nxt):
 			l.Backup()
 			return LexSymbol(l)
 		case nxt == EOF:
@@ -58,10 +43,10 @@ func LexNumeric(l *Lexer) LexFn {
 		l.AcceptMany(digits)
 	} else if l.AcceptOne(".") {
 		if l.AcceptMany(digits) == 0 {
-			return l.Error()
+			return l.Err("bad numeric")
 		}
 	} else {
-		return l.Error()
+		return l.Err("bad numeric")
 	}
 	if !l.AcceptOne("eE") {
 		l.Emit(token.KindNumeric)
@@ -72,12 +57,12 @@ func LexNumeric(l *Lexer) LexFn {
 		l.Emit(token.KindNumeric)
 		return LexBegin
 	}
-	return l.Error()
+	return l.Err("bad numeric")
 }
 
 func LexString(l *Lexer) LexFn {
 	if !l.AcceptOne("'\"") {
-		return l.Error()
+		return l.Err("bad string")
 	}
 	l.Ignore()
 	for c := l.Next(); !unicode.IsControl(c); c = l.Next() {
@@ -89,12 +74,12 @@ func LexString(l *Lexer) LexFn {
 			return LexBegin
 		}
 	}
-	return l.Error()
+	return l.Err("bad string")
 }
 
 func LexIdentifier(l *Lexer) LexFn {
 	if c := l.Next(); c != '_' && !unicode.IsLetter(c) {
-		return l.Error()
+		return l.Err("bad identifier")
 	}
 	for c := l.Next(); c == '_' || unicode.IsLetter(c) || unicode.IsNumber(c); c = l.Next() {
 	}
@@ -104,34 +89,33 @@ func LexIdentifier(l *Lexer) LexFn {
 }
 
 func LexSymbol(l *Lexer) LexFn {
-	if l.AcceptOne(symbols) {
+	if l.AcceptOne(token.Symbols) {
 		l.Emit(token.KindSymbol)
 		return LexBegin
 	}
-	return l.Error()
+	return l.Err("unrecognizable symbol")
 }
 
 func LexKeyword(l *Lexer) LexFn {
-	matches := keywords
-	cnt := 0
-	for len(matches) > 0 {
+	var fullMatch string
+	candidates := token.Keywords
+	for cnt := 0; len(candidates) > 0; cnt++ {
 		c := l.Next()
-		if !unicode.IsLetter(c) {
-			break
-		}
-		newMatches := make([]string, 0)
-		for _, m := range matches {
+		newCandidates := make([]string, 0)
+		for _, m := range candidates {
 			if rune(m[cnt]) == unicode.ToLower(c) {
-				newMatches = append(newMatches, m)
-			}
-			// TODO longest match
-			if m == strings.ToLower(l.Current()) && unicode.IsSpace(l.Peek()) {
-				l.Emit(token.KindKeyword)
-				return LexBegin
+				if cnt == len(m)-1 {
+					fullMatch = m
+					continue
+				}
+				newCandidates = append(newCandidates, m)
 			}
 		}
-		cnt++
-		matches = newMatches
+		candidates = newCandidates
+	}
+	if fullMatch != "" {
+		l.Emit(token.KindKeyword)
+		return LexBegin
 	}
 	l.Backup()
 	return LexIdentifier

@@ -13,47 +13,47 @@ func TestLexNumeric(t *testing.T) {
 	}{
 		{
 			input:       "123",
-			expectValue: []string{"123", "EOF"},
+			expectValue: []string{"123", ""},
 			expectKind:  []token.Kind{token.KindNumeric, token.KindEof},
 		},
 		{
 			input:       "123.",
-			expectValue: []string{"123.", "EOF"},
+			expectValue: []string{"123.", ""},
 			expectKind:  []token.Kind{token.KindNumeric, token.KindEof},
 		},
 		{
 			input:       "123.4",
-			expectValue: []string{"123.4", "EOF"},
+			expectValue: []string{"123.4", ""},
 			expectKind:  []token.Kind{token.KindNumeric, token.KindEof},
 		},
 		{
 			input:       "123e4",
-			expectValue: []string{"123e4", "EOF"},
+			expectValue: []string{"123e4", ""},
 			expectKind:  []token.Kind{token.KindNumeric, token.KindEof},
 		},
 		{
 			input:       "123.e+4",
-			expectValue: []string{"123.e+4", "EOF"},
+			expectValue: []string{"123.e+4", ""},
 			expectKind:  []token.Kind{token.KindNumeric, token.KindEof},
 		},
 		{
 			input:       "123.4e5",
-			expectValue: []string{"123.4e5", "EOF"},
+			expectValue: []string{"123.4e5", ""},
 			expectKind:  []token.Kind{token.KindNumeric, token.KindEof},
 		},
 		{
 			input:       "123.4e+5",
-			expectValue: []string{"123.4e+5", "EOF"},
+			expectValue: []string{"123.4e+5", ""},
 			expectKind:  []token.Kind{token.KindNumeric, token.KindEof},
 		},
 		{
 			input:       ".123",
-			expectValue: []string{".123", "EOF"},
+			expectValue: []string{".123", ""},
 			expectKind:  []token.Kind{token.KindNumeric, token.KindEof},
 		},
 		{
 			input:       ".123e4",
-			expectValue: []string{".123e4", "EOF"},
+			expectValue: []string{".123e4", ""},
 			expectKind:  []token.Kind{token.KindNumeric, token.KindEof},
 		},
 		{
@@ -109,22 +109,22 @@ func TestLexString(t *testing.T) {
 	}{
 		{
 			input:       "'abc'",
-			expectValue: []string{"abc", "EOF"},
+			expectValue: []string{"abc", ""},
 			expectKind:  []token.Kind{token.KindString, token.KindEof},
 		},
 		{
 			input:       "\"abc\"",
-			expectValue: []string{"abc", "EOF"},
+			expectValue: []string{"abc", ""},
 			expectKind:  []token.Kind{token.KindString, token.KindEof},
 		},
 		{
 			input:       "''",
-			expectValue: []string{"", "EOF"},
+			expectValue: []string{"", ""},
 			expectKind:  []token.Kind{token.KindString, token.KindEof},
 		},
 		{
 			input:       "\"\"",
-			expectValue: []string{"", "EOF"},
+			expectValue: []string{"", ""},
 			expectKind:  []token.Kind{token.KindString, token.KindEof},
 		},
 		{
@@ -170,7 +170,7 @@ func TestLexBegin(t *testing.T) {
 	}{
 		{
 			input:       "SELECT name, id FROM users;",
-			expectValue: []string{"SELECT", "name", ",", "id", "FROM", "users", ";", "EOF"},
+			expectValue: []string{"SELECT", "name", ",", "id", "FROM", "users", ";", ""},
 			expectKind: []token.Kind{
 				token.KindKeyword,
 				token.KindIdentifier,
@@ -182,23 +182,23 @@ func TestLexBegin(t *testing.T) {
 				token.KindEof,
 			},
 		},
-		//{
-		//	input:       "INSERT INTO users VALUES (2, 'Kate');",
-		//	expectValue: []string{"INSERT", "INTO", "users", "VALUES", "(", "2", ",", "Kate", ")", ";", "EOF"},
-		//	expectKind: []token.Kind{
-		//		token.KindKeyword,
-		//		token.KindKeyword,
-		//		token.KindIdentifier,
-		//		token.KindKeyword,
-		//		token.KindSymbol,
-		//		token.KindNumeric,
-		//		token.KindSymbol,
-		//		token.KindString,
-		//		token.KindSymbol,
-		//		token.KindSymbol,
-		//		token.KindEof,
-		//	},
-		//},
+		{
+			input:       "INSERT INTO users VALUES (2, 'Kate');",
+			expectValue: []string{"INSERT", "INTO", "users", "VALUES", "(", "2", ",", "Kate", ")", ";", ""},
+			expectKind: []token.Kind{
+				token.KindKeyword,
+				token.KindKeyword,
+				token.KindIdentifier,
+				token.KindKeyword,
+				token.KindSymbol,
+				token.KindNumeric,
+				token.KindSymbol,
+				token.KindString,
+				token.KindSymbol,
+				token.KindSymbol,
+				token.KindEof,
+			},
+		},
 	}
 
 	for _, test := range tests {

@@ -3,9 +3,10 @@ package token
 type symbol string
 
 const (
-	Semicolon  symbol = ";"
-	Asterisk   symbol = "*"
-	Comma      symbol = ","
-	LeftParen  symbol = "("
-	RightParen symbol = ")"
+	SEMICOLON symbol = ";"
+	ASTERISK  symbol = "*"
+	COMMA     symbol = ","
+	LPAREN    symbol = "("
+	RPAREN    symbol = ")"
+	Symbols   string = ";*,()"
 )
