@@ -41,14 +41,14 @@ func LexNumeric(l *Lexer) LexFn {
 	if l.AcceptManyIn(digits) > 0 {
 		l.AcceptOneIn(".")
 		l.AcceptManyIn(digits)
-	} else if l.AcceptOneIn(".") {
+	} else if l.AcceptOneIn(".") > 0 {
 		if l.AcceptManyIn(digits) == 0 {
 			return l.Err("bad numeric")
 		}
 	} else {
 		return l.Err("bad numeric")
 	}
-	if !l.AcceptOneIn("eE") {
+	if l.AcceptOneIn("eE") < 0 {
 		l.Emit(token.KindNumeric)
 		return LexBegin
 	}
@@ -61,12 +61,22 @@ func LexNumeric(l *Lexer) LexFn {
 }
 
 func LexString(l *Lexer) LexFn {
-	if !l.AcceptOneIn("'\"") {
+	if l.AcceptOneIn("'\"") < 0 {
 		return l.Err("bad string")
 	}
 	l.Ignore()
 	for c := l.Next(); !unicode.IsControl(c); c = l.Next() {
+		if c == '\\' {
+			if r := l.Peek(); r == '\'' || r == '"' {
+				l.Next()
+				continue
+			}
+		}
 		if c == '\'' || c == '"' {
+			if r := l.Peek(); r == c {
+				l.Next()
+				continue
+			}
 			l.Backup()
 			l.Emit(token.KindString)
 			l.Next()
@@ -78,18 +88,16 @@ func LexString(l *Lexer) LexFn {
 }
 
 func LexIdentifier(l *Lexer) LexFn {
-	if c := l.Next(); c != '_' && !unicode.IsLetter(c) {
+	if l.AcceptOneIf(func(r rune) bool { return r == '_' || unicode.IsLetter(r) }) < 0 {
 		return l.Err("bad identifier")
 	}
-	for c := l.Next(); c == '_' || unicode.IsLetter(c) || unicode.IsNumber(c); c = l.Next() {
-	}
-	l.Backup()
+	l.AcceptManyIf(func(r rune) bool { return r == '_' || unicode.IsLetter(r) || unicode.IsDigit(r) })
 	l.Emit(token.KindIdentifier)
 	return LexBegin
 }
 
 func LexSymbol(l *Lexer) LexFn {
-	if l.AcceptOneIn(token.Symbols) {
+	if l.AcceptOneIn(token.Symbols) > 0 {
 		l.Emit(token.KindSymbol)
 		return LexBegin
 	}

@@ -127,6 +127,16 @@ func TestLexString(t *testing.T) {
 			expectKinds:  succKinds,
 		},
 		{
+			input:        "\"ab\"\"c\"",
+			expectValues: []string{"ab\"\"c", ""},
+			expectKinds:  succKinds,
+		},
+		{
+			input:        "\"ab\\'c\"",
+			expectValues: []string{"ab\\'c", ""},
+			expectKinds:  succKinds,
+		},
+		{
 			input:        "'",
 			expectValues: []string{""},
 			expectKinds:  failKinds,
@@ -252,6 +262,59 @@ func TestLexSymbol(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.input, func(t *testing.T) {
 			lexer := New(test.input, LexSymbol)
+			go lexer.Run()
+			tk := lexer.NextToken()
+			for i := 0; tk != nil; i++ {
+				if tk.Value != test.expectValues[i] || tk.Kind != test.expectKinds[i] {
+					t.Errorf(
+						"expected '%s' of kind %d, got '%v' of kind %d",
+						test.expectValues[i], test.expectKinds[i], tk.Value, tk.Kind,
+					)
+				}
+				tk = lexer.NextToken()
+			}
+		})
+	}
+}
+
+func TestLexIdentifier(t *testing.T) {
+	succKinds := []token.Kind{token.KindIdentifier, token.KindEof}
+	failKinds := []token.Kind{token.KindError}
+	tests := []struct {
+		input        string
+		expectValues []string
+		expectKinds  []token.Kind
+	}{
+		{
+			input:        "_abc",
+			expectValues: []string{"_abc", ""},
+			expectKinds:  succKinds,
+		},
+		{
+			input:        "abc",
+			expectValues: []string{"abc", ""},
+			expectKinds:  succKinds,
+		},
+		{
+			input:        "__",
+			expectValues: []string{"__", ""},
+			expectKinds:  succKinds,
+		},
+		{
+			input:        "a1b2c3",
+			expectValues: []string{"a1b2c3", ""},
+			expectKinds:  succKinds,
+		},
+		{
+			input:        "123a",
+			expectValues: []string{""},
+			expectKinds:  failKinds,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.input, func(t *testing.T) {
+			lexer := New(test.input, LexIdentifier)
 			go lexer.Run()
 			tk := lexer.NextToken()
 			for i := 0; tk != nil; i++ {
