@@ -50,6 +50,11 @@ func (l *Lexer) Remainder() string {
 	return l.Input[l.Pos:]
 }
 
+func (l *Lexer) Last() rune {
+	res, _ := utf8.DecodeRuneInString(l.Input[l.Pos-l.Width : l.Pos])
+	return res
+}
+
 //func (l *Lexer) Revert() {
 //	l.Pos = l.Start
 //	l.Width = 0
@@ -60,7 +65,7 @@ func (l *Lexer) Backup() {
 	if l.Cursor.Pos > l.Cursor.Start {
 		l.Cursor.Pos -= l.Cursor.Width
 		l.Location.Column--
-		if res, _ := utf8.DecodeRuneInString(l.Input[l.Pos : l.Pos+l.Width]); res == NEWLINE {
+		if res, _ := utf8.DecodeRuneInString(l.Input[l.Pos:]); res == NEWLINE {
 			l.Location.Line--
 			l.Location.Column = l.Cursor.lastLineLength
 		}
@@ -88,7 +93,23 @@ func (l *Lexer) Ignore() {
 	l.Start = l.Pos
 }
 
-func (l *Lexer) AcceptOne(valid string) bool {
+func (l *Lexer) AcceptOneIf(p func(rune) bool) bool {
+	if p(l.Next()) {
+		return true
+	}
+	l.Backup()
+	return false
+}
+
+func (l *Lexer) AcceptManyIf(p func(rune) bool) (len int) {
+	for p(l.Next()) {
+		len++
+	}
+	l.Backup()
+	return len
+}
+
+func (l *Lexer) AcceptOneIn(valid string) bool {
 	if strings.ContainsRune(valid, l.Next()) {
 		return true
 	}
@@ -96,7 +117,7 @@ func (l *Lexer) AcceptOne(valid string) bool {
 	return false
 }
 
-func (l *Lexer) AcceptMany(valid string) (len int) {
+func (l *Lexer) AcceptManyIn(valid string) (len int) {
 	for strings.ContainsRune(valid, l.Next()) {
 		len++
 	}

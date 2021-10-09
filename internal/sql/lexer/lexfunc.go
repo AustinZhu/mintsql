@@ -38,22 +38,22 @@ func LexBegin(l *Lexer) LexFn {
 
 func LexNumeric(l *Lexer) LexFn {
 	digits := "1234567890"
-	if l.AcceptMany(digits) > 0 {
-		l.AcceptOne(".")
-		l.AcceptMany(digits)
-	} else if l.AcceptOne(".") {
-		if l.AcceptMany(digits) == 0 {
+	if l.AcceptManyIn(digits) > 0 {
+		l.AcceptOneIn(".")
+		l.AcceptManyIn(digits)
+	} else if l.AcceptOneIn(".") {
+		if l.AcceptManyIn(digits) == 0 {
 			return l.Err("bad numeric")
 		}
 	} else {
 		return l.Err("bad numeric")
 	}
-	if !l.AcceptOne("eE") {
+	if !l.AcceptOneIn("eE") {
 		l.Emit(token.KindNumeric)
 		return LexBegin
 	}
-	l.AcceptOne("+-")
-	if l.AcceptMany(digits) > 0 {
+	l.AcceptOneIn("+-")
+	if l.AcceptManyIn(digits) > 0 {
 		l.Emit(token.KindNumeric)
 		return LexBegin
 	}
@@ -61,7 +61,7 @@ func LexNumeric(l *Lexer) LexFn {
 }
 
 func LexString(l *Lexer) LexFn {
-	if !l.AcceptOne("'\"") {
+	if !l.AcceptOneIn("'\"") {
 		return l.Err("bad string")
 	}
 	l.Ignore()
@@ -89,7 +89,7 @@ func LexIdentifier(l *Lexer) LexFn {
 }
 
 func LexSymbol(l *Lexer) LexFn {
-	if l.AcceptOne(token.Symbols) {
+	if l.AcceptOneIn(token.Symbols) {
 		l.Emit(token.KindSymbol)
 		return LexBegin
 	}
@@ -97,26 +97,34 @@ func LexSymbol(l *Lexer) LexFn {
 }
 
 func LexKeyword(l *Lexer) LexFn {
-	var fullMatch string
+	c := l.Next()
+	var match string
 	candidates := token.Keywords
-	for cnt := 0; len(candidates) > 0; cnt++ {
-		c := l.Next()
+
+	for i := 0; len(candidates) > 0 && unicode.IsLetter(c); i++ {
 		newCandidates := make([]string, 0)
-		for _, m := range candidates {
-			if rune(m[cnt]) == unicode.ToLower(c) {
-				if cnt == len(m)-1 {
-					fullMatch = m
+		anyMatch := false
+		for _, can := range candidates {
+			if rune(can[i]) == unicode.ToLower(c) {
+				anyMatch = true
+				if i == len(can)-1 {
+					match = can
 					continue
 				}
-				newCandidates = append(newCandidates, m)
+				newCandidates = append(newCandidates, can)
 			}
 		}
+		if !anyMatch {
+			break
+		}
 		candidates = newCandidates
+		c = l.Next()
 	}
-	if fullMatch != "" {
+	l.Backup()
+
+	if match != "" {
 		l.Emit(token.KindKeyword)
 		return LexBegin
 	}
-	l.Backup()
 	return LexIdentifier
 }
