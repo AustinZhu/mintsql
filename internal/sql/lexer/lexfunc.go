@@ -8,28 +8,26 @@ import (
 
 func lexBegin(l *Lexer) LexFn {
 	for {
-		switch nxt := l.next(); {
+		switch nxt := l.peek(); {
 		case nxt == NEWLINE:
 			l.location.Line++
+			l.next()
 			l.ignore()
 		case unicode.IsSpace(nxt):
+			l.next()
 			l.ignore()
 		case nxt == '.' || unicode.IsDigit(nxt):
-			l.backup()
 			return lexNumeric(l)
 		case nxt == '\'' || nxt == '"':
-			l.backup()
 			return lexString(l)
 		case unicode.IsLetter(nxt):
-			l.backup()
 			return lexKeyword(l)
 		case nxt == '_':
-			l.backup()
 			return lexIdentifier(l)
 		case strings.ContainsRune(token.Symbols, nxt):
-			l.backup()
 			return lexSymbol(l)
 		case nxt == EOF:
+			l.next()
 			l.emit(token.KindEof)
 			return nil
 		}
