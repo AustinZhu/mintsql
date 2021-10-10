@@ -23,11 +23,11 @@ func TestParseSelectStmt(t *testing.T) {
 					Items: []*ast.Expr{
 						{
 							Body: "name",
-							Kind: 0,
+							Kind: ast.KindColumn,
 						},
 						{
 							Body: "id",
-							Kind: 0,
+							Kind: ast.KindColumn,
 						},
 					},
 					From: "users",
