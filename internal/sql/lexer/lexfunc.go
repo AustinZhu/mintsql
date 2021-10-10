@@ -109,7 +109,7 @@ func lexKeyword(l *Lexer) LexFn {
 	var match string
 	candidates := token.Keywords
 
-	for i := 0; len(candidates) > 0 && unicode.IsLetter(c); i++ {
+	for i := 0; unicode.IsLetter(c); i++ {
 		newCandidates := make([]string, 0)
 		anyMatch := false
 		for _, can := range candidates {

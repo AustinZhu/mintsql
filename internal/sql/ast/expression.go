@@ -4,6 +4,9 @@ type ExprKind uint
 
 const (
 	KindLiteral ExprKind = iota
+	KindColumn
+	KindAsterisk
+	KindAggregate
 )
 
 type Expr struct {

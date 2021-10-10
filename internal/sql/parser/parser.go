@@ -114,7 +114,7 @@ func parseExprs(tokens *token.Stream) ([]*ast.Expr, error) {
 	if tk := tokens.Next(); !token.HasKind(tk, token.KindIdentifier) {
 		return nil, token.Error(tk, "invalid column name", "<identifier>")
 	} else {
-		expr = append(expr, &ast.Expr{Kind: ast.KindLiteral, Body: tk.Value})
+		expr = append(expr, &ast.Expr{Kind: ast.KindColumn, Body: tk.Value})
 	}
 
 	for tk := tokens.Peek(); token.NewSymbol(token.COMMA).Equals(tk); {
@@ -122,7 +122,7 @@ func parseExprs(tokens *token.Stream) ([]*ast.Expr, error) {
 		if tk = tokens.Next(); !token.HasKind(tk, token.KindIdentifier) {
 			return nil, token.Error(tk, "invalid column name", "<identifier>")
 		} else {
-			expr = append(expr, &ast.Expr{Kind: ast.KindLiteral, Body: tk.Value})
+			expr = append(expr, &ast.Expr{Kind: ast.KindColumn, Body: tk.Value})
 		}
 	}
 
