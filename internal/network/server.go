@@ -1,20 +1,54 @@
 package network
 
+import (
+	"log"
+	"net"
+)
+
 const (
-	HOST     = "localhost"
+	HOST     = "127.0.0.1"
 	PROTOCOL = "tcp"
+	PORT     = 7384
 )
 
 type Server struct {
-	Host string
-	Port uint16
+	Addr *net.TCPAddr
 	//ConnPool
 }
 
-func New(host string, port uint16, poolSize int) {
-	panic("Not Implemented")
+func New(host string, port uint16, poolSize int) (s *Server) {
+	// TODO server network options
+	s = &Server{}
+	s.Addr = &net.TCPAddr{
+		IP:   net.ParseIP(HOST),
+		Port: PORT,
+	}
+	return s
 }
 
 func (s *Server) Run() {
+	log.Printf("Welcome to mintsql Server.")
+	l, err := net.ListenTCP(PROTOCOL, s.Addr)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	defer func(l *net.TCPListener) {
+		err := l.Close()
+		if err != nil {
+			log.Println(err)
+		}
+	}(l)
+	log.Printf("Listening on %s", s.Addr)
+	for {
+		conn, err := l.AcceptTCP()
+		log.Printf("Accepted incoming connection on %s", conn.RemoteAddr())
+		if err != nil {
+			log.Fatalln(err)
+		}
+		go s.Handle(conn)
+	}
+}
+
+func (s *Server) Handle(conn *net.TCPConn) {
 	panic("Not Implemented")
 }
