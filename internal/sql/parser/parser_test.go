@@ -116,11 +116,11 @@ func TestParseCreateStmt(t *testing.T) {
 					Cols: []*ast.ColumnDef{
 						{
 							Name:     "id",
-							DataType: "int",
+							DataType: "INT",
 						},
 						{
 							Name:     "name",
-							DataType: "text",
+							DataType: "TEXT",
 						},
 					},
 				},

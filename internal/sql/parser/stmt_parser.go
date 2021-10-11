@@ -124,6 +124,10 @@ func parseInsertStmt(tokens *token.Stream) (*ast.Stmt, error) {
 		stmt.InsertStmt.Table = tk.Value
 	}
 
+	if tk := tokens.Next(); token.NewKeyword(token.VALUES).NotEquals(tk) {
+		return nil, token.Error(tk, "missing keyword", token.VALUES)
+	}
+
 	if tk := tokens.Next(); token.NewSymbol(token.LPAREN).NotEquals(tk) {
 		return nil, token.Error(tk, "missing parentheses", token.LPAREN)
 	}
