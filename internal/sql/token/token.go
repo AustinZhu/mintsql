@@ -42,8 +42,43 @@ func (t *Token) Equals(tk *Token) bool {
 	return t.Value == tk.Value
 }
 
-func HasKind(tk *Token, kind Kind) bool {
-	return tk != nil && kind == tk.Kind
+func (t *Token) NotEquals(tk *Token) bool {
+	if tk == nil && t.Kind != tk.Kind {
+		return true
+	}
+	if t.Kind == KindKeyword && strings.ToLower(t.Value) == strings.ToLower(tk.Value) {
+		return false
+	}
+	return t.Value != tk.Value
+}
+
+func IsKind(tk *Token, kinds ...Kind) (ok bool) {
+	if tk == nil {
+		return false
+	}
+	for _, k := range kinds {
+		ok = ok || k == tk.Kind
+	}
+	return
+}
+
+func NotKind(tk *Token, kinds ...Kind) (ok bool) {
+	if tk == nil {
+		return true
+	}
+	ok = true
+	for _, k := range kinds {
+		ok = ok && k != tk.Kind
+	}
+	return
+}
+
+func IsEnd(tk *Token) bool {
+	return tk == nil || tk.Kind == KindEof
+}
+
+func NotEnd(tk *Token) bool {
+	return tk != nil && tk.Kind != KindEof
 }
 
 func (t Token) String() string {

@@ -1,7 +1,9 @@
 package network
 
 import (
+	"context"
 	"log"
+	"mintsql/internal/backend"
 	"net"
 )
 
@@ -12,7 +14,8 @@ const (
 )
 
 type Server struct {
-	Addr *net.TCPAddr
+	Addr   *net.TCPAddr
+	Engine *backend.Engine
 	//ConnPool
 }
 
@@ -45,10 +48,10 @@ func (s *Server) Run() {
 		if err != nil {
 			log.Fatalln(err)
 		}
-		go s.Handle(conn)
+		go s.Handle(context.TODO(), conn)
 	}
 }
 
-func (s *Server) Handle(conn *net.TCPConn) {
+func (s *Server) Handle(ctx context.Context, conn *net.TCPConn) {
 	panic("Not Implemented")
 }

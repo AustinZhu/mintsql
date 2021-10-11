@@ -30,10 +30,8 @@ func TestParseSelectStmt(t *testing.T) {
 							Kind: ast.KindColumn,
 						},
 					},
-					From: "users",
+					Table: "users",
 				},
-				InsertStmt:      nil,
-				CreateTableStmt: nil,
 			},
 		},
 	}
@@ -43,6 +41,98 @@ func TestParseSelectStmt(t *testing.T) {
 			parser := New(test.input)
 			tokens := extractTokens(parser.Lexer)
 			selectStmt, err := parseSelectStmt(tokens)
+			if err != nil != test.isError {
+				t.Error(err)
+				return
+			}
+			if diff := cmp.Diff(test.expectedAst, selectStmt); diff != "" {
+				t.Errorf("SelectStmt mismatch (-want +got):\n%s", diff)
+				return
+			}
+			return
+		})
+	}
+}
+
+func TestParseInsertStmt(t *testing.T) {
+	tests := []struct {
+		input       string
+		isError     bool
+		expectedAst *ast.Stmt
+	}{
+		{
+			input:   "INSERT INTO users VALUES (2, 'Kate');",
+			isError: false,
+			expectedAst: &ast.Stmt{
+				Kind: ast.KindInsert,
+				InsertStmt: &ast.InsertStmt{
+					Table: "users",
+					Values: []*ast.Expr{
+						{
+							Body: "2",
+							Kind: ast.KindLiteral,
+						},
+						{
+							Body: "Kate",
+							Kind: ast.KindLiteral,
+						},
+					},
+				},
+			},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.input, func(t *testing.T) {
+			parser := New(test.input)
+			tokens := extractTokens(parser.Lexer)
+			selectStmt, err := parseInsertStmt(tokens)
+			if err != nil != test.isError {
+				t.Error(err)
+				return
+			}
+			if diff := cmp.Diff(test.expectedAst, selectStmt); diff != "" {
+				t.Errorf("SelectStmt mismatch (-want +got):\n%s", diff)
+				return
+			}
+			return
+		})
+	}
+}
+
+func TestParseCreateStmt(t *testing.T) {
+	tests := []struct {
+		input       string
+		isError     bool
+		expectedAst *ast.Stmt
+	}{
+		{
+			input:   "CREATE TABLE users (id INT, name TEXT);",
+			isError: false,
+			expectedAst: &ast.Stmt{
+				Kind: ast.KindCreateTable,
+				CreateTableStmt: &ast.CreateTableStmt{
+					Name: "users",
+					Cols: []*ast.ColumnDef{
+						{
+							Name:     "id",
+							DataType: "int",
+						},
+						{
+							Name:     "name",
+							DataType: "text",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.input, func(t *testing.T) {
+			parser := New(test.input)
+			tokens := extractTokens(parser.Lexer)
+			selectStmt, err := parseCreateStmt(tokens)
 			if err != nil != test.isError {
 				t.Error(err)
 				return

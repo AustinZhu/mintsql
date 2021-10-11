@@ -1,8 +1,8 @@
 package ast
 
 type SelectStmt struct {
+	Table string
 	Items []*Expr
-	From  string
 }
 
 type InsertStmt struct {

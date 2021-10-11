@@ -68,7 +68,7 @@ func (l *Lexer) next() (res rune) {
 	res, l.cursor.width = utf8.DecodeRuneInString(l.input[l.pos:])
 	l.cursor.pos += l.cursor.width
 	l.location.Column++
-	return res
+	return
 }
 
 func (l *Lexer) peek() rune {
@@ -98,7 +98,7 @@ func (l *Lexer) acceptManyIf(pred func(rune) bool) (len int) {
 		len++
 	}
 	l.backup()
-	return len
+	return
 }
 
 func (l *Lexer) acceptOneIn(domain string) rune {
@@ -116,7 +116,7 @@ func (l *Lexer) acceptManyIn(domain string) (len int) {
 		len++
 	}
 	l.backup()
-	return len
+	return
 }
 
 func (l *Lexer) err(msg string) LexFn {
