@@ -1,5 +1,7 @@
 package backend
 
+import "context"
+
 type Processor interface {
-	Process()
+	Process(ctx context.Context)
 }
