@@ -14,7 +14,7 @@ type Parser struct {
 
 func New(src string) *Parser {
 	return &Parser{
-		Ast:   &ast.Ast{},
+		Ast:   new(ast.Ast),
 		Lexer: lexer.New(src),
 	}
 }
@@ -25,7 +25,7 @@ func NewFromFile(path string) *Parser {
 		panic(err)
 	}
 	return &Parser{
-		Ast:   &ast.Ast{},
+		Ast:   new(ast.Ast),
 		Lexer: lexer.New(string(src)),
 	}
 }
