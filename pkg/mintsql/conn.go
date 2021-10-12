@@ -6,14 +6,18 @@ import (
 	"net"
 )
 
+var DefaultConnPool *ConnPool
+
 type Conn struct {
 	net.Conn
-	pool *ConnPool
 }
 
 func (c *Conn) Close() error {
+	if DefaultConnPool == nil {
+		return errors.New("pool not configured")
+	}
 	select {
-	case c.pool.conn <- c:
+	case DefaultConnPool.conn <- c:
 		return nil
 	default:
 		return c.Conn.Close()
@@ -29,9 +33,7 @@ func (cp *ConnPool) Get() (*Conn, error) {
 	if cp.conn == nil {
 		return nil, errors.New("pool closed")
 	}
-	poolConn := &Conn{
-		pool: cp,
-	}
+	poolConn := new(Conn)
 	select {
 	case c, ok := <-cp.conn:
 		if !ok {
@@ -58,18 +60,18 @@ func (cp *ConnPool) Len() int {
 	return len(cp.conn)
 }
 
-func NewConnPool(capacity int, addr *net.TCPAddr) (*ConnPool, error) {
+func NewConnPool(capacity int, addr *net.TCPAddr) error {
 	if capacity <= 0 {
-		return nil, errors.New("invalid capacity")
+		return errors.New("invalid capacity")
 	}
-	cp := &ConnPool{conn: make(chan net.Conn, capacity), addr: addr}
+	DefaultConnPool = &ConnPool{conn: make(chan net.Conn, capacity), addr: addr}
 
 	for i := 0; i < capacity; i++ {
 		conn, err := net.DialTCP("tcp", nil, addr)
 		if err != nil {
-			return nil, fmt.Errorf("failed to dial %s", addr)
+			return fmt.Errorf("failed to dial %s", addr)
 		}
-		cp.conn <- conn
+		DefaultConnPool.conn <- conn
 	}
-	return cp, nil
+	return nil
 }
