@@ -1,10 +1,12 @@
 package backend
 
-import "context"
+import (
+	"context"
+)
 
 type Engine struct {
-	QueryProcessor QueryProcessor
-	//Store
+	Lang  QueryProcessor
+	Store StoreProcessor
 }
 
 func Setup() *Engine {
