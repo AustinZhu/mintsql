@@ -8,14 +8,7 @@ import (
 )
 
 type Parser struct {
-	Ast   *ast.Ast
 	Lexer *lexer.Lexer
-}
-
-func New() *Parser {
-	return &Parser{
-		Ast: new(ast.Ast),
-	}
 }
 
 func NewFromFile(path string) *Parser {
@@ -24,7 +17,6 @@ func NewFromFile(path string) *Parser {
 		panic(err)
 	}
 	return &Parser{
-		Ast:   new(ast.Ast),
 		Lexer: lexer.New(string(src)),
 	}
 }

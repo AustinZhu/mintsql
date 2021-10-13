@@ -22,11 +22,17 @@ func TestParseSelectStmt(t *testing.T) {
 				SelectStmt: &ast.SelectStmt{
 					Items: []*ast.Expr{
 						{
-							Body: "name",
+							Body: &ast.ExprBody{
+								Raw:  "name",
+								Kind: token.KindIdentifier,
+							},
 							Kind: ast.KindColumn,
 						},
 						{
-							Body: "id",
+							Body: &ast.ExprBody{
+								Raw:  "id",
+								Kind: token.KindIdentifier,
+							},
 							Kind: ast.KindColumn,
 						},
 					},
@@ -38,8 +44,8 @@ func TestParseSelectStmt(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.input, func(t *testing.T) {
-			parser := New(test.input)
-			tokens := extractTokens(parser.Lexer)
+			l := lexer.New(test.input)
+			tokens := extractTokens(l)
 			selectStmt, err := parseSelectStmt(tokens)
 			if err != nil != test.isError {
 				t.Error(err)
@@ -69,11 +75,17 @@ func TestParseInsertStmt(t *testing.T) {
 					Table: "users",
 					Values: []*ast.Expr{
 						{
-							Body: "2",
+							Body: &ast.ExprBody{
+								Raw:  "2",
+								Kind: token.KindNumeric,
+							},
 							Kind: ast.KindLiteral,
 						},
 						{
-							Body: "Kate",
+							Body: &ast.ExprBody{
+								Raw:  "Kate",
+								Kind: token.KindString,
+							},
 							Kind: ast.KindLiteral,
 						},
 					},
@@ -84,8 +96,8 @@ func TestParseInsertStmt(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.input, func(t *testing.T) {
-			parser := New(test.input)
-			tokens := extractTokens(parser.Lexer)
+			l := lexer.New(test.input)
+			tokens := extractTokens(l)
 			selectStmt, err := parseInsertStmt(tokens)
 			if err != nil != test.isError {
 				t.Error(err)
@@ -130,8 +142,8 @@ func TestParseCreateStmt(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.input, func(t *testing.T) {
-			parser := New(test.input)
-			tokens := extractTokens(parser.Lexer)
+			l := lexer.New(test.input)
+			tokens := extractTokens(l)
 			selectStmt, err := parseCreateStmt(tokens)
 			if err != nil != test.isError {
 				t.Error(err)

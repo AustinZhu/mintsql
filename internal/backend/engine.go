@@ -12,7 +12,7 @@ type Engine struct {
 
 func Setup() *Engine {
 	lang := &QueryProcessor{
-		Parser: parser.New(),
+		Parser: new(parser.Parser),
 	}
 	store := new(StoreProcessor)
 	err := store.Load()
