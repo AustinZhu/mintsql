@@ -1,6 +1,7 @@
 package server
 
 import (
+	"bufio"
 	"context"
 	"log"
 	"mintsql/internal/backend"
@@ -18,9 +19,10 @@ type Server struct {
 	Engine *backend.Engine
 }
 
-func New(host string, port uint16, poolSize int) (s *Server) {
-	// TODO server network options
-	s = &Server{}
+func New(host string, port uint16) (s *Server) {
+	s = &Server{
+		Engine: new(backend.Engine),
+	}
 	s.Addr = &net.TCPAddr{
 		IP:   net.ParseIP(HOST),
 		Port: PORT,
@@ -52,5 +54,20 @@ func (s *Server) Run() {
 }
 
 func (s *Server) Handle(ctx context.Context, conn *net.TCPConn) {
-	panic("Not Implemented")
+	defer func(conn *net.TCPConn) {
+		err := conn.Close()
+		if err != nil {
+			log.Println(err)
+		}
+	}(conn)
+	str, err := bufio.NewReader(conn).ReadString('\n')
+	if err != nil {
+		panic(err)
+	}
+	res, err := s.Engine.Execute(ctx, str)
+	resp := res.String()
+	_, err = conn.Write([]byte(resp))
+	if err != nil {
+		log.Fatalln(err)
+	}
 }

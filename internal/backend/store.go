@@ -7,6 +7,7 @@ import (
 	"mintsql/internal/sql/ast"
 	"mintsql/internal/sql/token"
 	"mintsql/internal/store"
+	"strings"
 )
 
 type StoreProcessor struct {
@@ -39,6 +40,36 @@ func (sp *StoreProcessor) Load() error {
 type Result struct {
 	Columns []store.Column
 	Rows    [][]store.Cell
+}
+
+func (r Result) String() string {
+	sb := new(strings.Builder)
+	for _, col := range r.Columns {
+		sb.WriteString(fmt.Sprintf("| %s ", col.Name))
+	}
+	sb.WriteString("|")
+
+	for i := 0; i < 20; i++ {
+		sb.WriteString("=")
+	}
+	sb.WriteString("\n")
+
+	for _, result := range r.Rows {
+		sb.WriteString("|")
+		for i, cell := range result {
+			typ := r.Columns[i].Type
+			s := ""
+			switch typ {
+			case store.Int:
+				s = fmt.Sprintf("%d", cell.AsInt())
+			case store.Text:
+				s = cell.AsText()
+			}
+			sb.WriteString(fmt.Sprintf(" %s | ", s))
+		}
+		sb.WriteString("\n")
+	}
+	return sb.String()
 }
 
 func (sp *StoreProcessor) createTable(stmt *ast.CreateTableStmt) error {
