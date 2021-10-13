@@ -12,7 +12,7 @@ type QueryProcessor struct {
 
 func (qp *QueryProcessor) Process(ctx context.Context, s string) (ast.Ast, error) {
 	defer func() {
-		qp.Parser = parser.New()
+		qp.Parser = new(parser.Parser)
 	}()
 	return qp.Parser.Parse(s)
 }
