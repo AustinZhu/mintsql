@@ -8,9 +8,11 @@ import (
 
 type QueryProcessor struct {
 	Parser *parser.Parser
-	Ast    chan *ast.Ast
 }
 
-func (qp *QueryProcessor) Process(ctx context.Context) error {
-	return nil
+func (qp *QueryProcessor) Process(ctx context.Context, s string) (ast.Ast, error) {
+	defer func() {
+		qp.Parser = parser.New()
+	}()
+	return qp.Parser.Parse(s)
 }

@@ -137,7 +137,7 @@ func (l *Lexer) try(funcs ...LexFn) {
 	for _, f := range funcs {
 		lex := *l
 		lex.state = f
-		go lex.Run()
+		go lex.Lex()
 		if l.Error == nil {
 			*l = lex
 			break
@@ -145,16 +145,12 @@ func (l *Lexer) try(funcs ...LexFn) {
 	}
 }
 
-func (l *Lexer) Run() {
+func (l *Lexer) Lex() {
 	defer func() {
-		l.shutdown()
+		close(l.tokens)
 	}()
 	for ; l.state != nil; l.state = l.state(l) {
 	}
-}
-
-func (l *Lexer) shutdown() {
-	close(l.tokens)
 }
 
 func New(src string) *Lexer {

@@ -12,10 +12,9 @@ type Parser struct {
 	Lexer *lexer.Lexer
 }
 
-func New(src string) *Parser {
+func New() *Parser {
 	return &Parser{
-		Ast:   new(ast.Ast),
-		Lexer: lexer.New(src),
+		Ast: new(ast.Ast),
 	}
 }
 
@@ -30,8 +29,9 @@ func NewFromFile(path string) *Parser {
 	}
 }
 
-func (p *Parser) Parse() error {
-	go p.Lexer.Run()
+func (p *Parser) Parse(src string) (ast ast.Ast, err error) {
+	p.Lexer = lexer.New(src)
+	go p.Lexer.Lex()
 	tokens := token.NewStream()
 	delimiter := token.NewSymbol(token.SEMICOLON)
 
@@ -43,9 +43,9 @@ func (p *Parser) Parse() error {
 				break
 			}
 		}
-		if err := parseStmt(p.Ast, tokens); err != nil {
-			return err
+		if err = parseStmt(ast, tokens); err != nil {
+			return nil, err
 		}
 	}
-	return nil
+	return
 }

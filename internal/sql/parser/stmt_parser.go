@@ -5,7 +5,7 @@ import (
 	"mintsql/internal/sql/token"
 )
 
-func parseStmt(stmts *ast.Ast, tokens *token.Stream) error {
+func parseStmt(stmts ast.Ast, tokens *token.Stream) error {
 	init := tokens.Peek()
 	if init.Kind != token.KindKeyword {
 		return token.Error(init, "not a keyword", token.SELECT, token.INSERT, token.CREATE)

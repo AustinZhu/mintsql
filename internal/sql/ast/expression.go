@@ -1,5 +1,7 @@
 package ast
 
+import "mintsql/internal/sql/token"
+
 type ExprKind uint
 
 const (
@@ -10,6 +12,11 @@ const (
 )
 
 type Expr struct {
-	Body string
+	Body *ExprBody
 	Kind ExprKind
+}
+
+type ExprBody struct {
+	Raw  string
+	Kind token.Kind
 }

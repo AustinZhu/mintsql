@@ -148,7 +148,7 @@ func TestParseCreateStmt(t *testing.T) {
 
 func extractTokens(l *lexer.Lexer) *token.Stream {
 	stream := token.NewStream()
-	go l.Run()
+	go l.Lex()
 	for tk := l.NextToken(); tk != nil; tk = l.NextToken() {
 		stream.Add(tk)
 	}

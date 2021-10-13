@@ -83,7 +83,7 @@ func TestLexNumeric(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.input, func(t *testing.T) {
 			lexer := withState(test.input, lexNumeric)
-			go lexer.Run()
+			go lexer.Lex()
 			tk := lexer.NextToken()
 			for i := 0; tk != nil; i++ {
 				if tk.Value != test.expectValues[i] || tk.Kind != test.expectKinds[i] {
@@ -156,7 +156,7 @@ func TestLexString(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.input, func(t *testing.T) {
 			lexer := withState(test.input, lexString)
-			go lexer.Run()
+			go lexer.Lex()
 			tk := lexer.NextToken()
 			for i := 0; tk != nil; i++ {
 				if tk.Value != test.expectValues[i] || tk.Kind != test.expectKinds[i] {
@@ -214,7 +214,7 @@ func TestLexKeyword(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.input, func(t *testing.T) {
 			lexer := withState(test.input, lexKeyword)
-			go lexer.Run()
+			go lexer.Lex()
 			tk := lexer.NextToken()
 			for i := 0; tk != nil; i++ {
 				if tk.Value != test.expectValues[i] || tk.Kind != test.expectKinds[i] {
@@ -262,7 +262,7 @@ func TestLexSymbol(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.input, func(t *testing.T) {
 			lexer := withState(test.input, lexSymbol)
-			go lexer.Run()
+			go lexer.Lex()
 			tk := lexer.NextToken()
 			for i := 0; tk != nil; i++ {
 				if tk.Value != test.expectValues[i] || tk.Kind != test.expectKinds[i] {
@@ -315,7 +315,7 @@ func TestLexIdentifier(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.input, func(t *testing.T) {
 			lexer := withState(test.input, lexIdentifier)
-			go lexer.Run()
+			go lexer.Lex()
 			tk := lexer.NextToken()
 			for i := 0; tk != nil; i++ {
 				if tk.Value != test.expectValues[i] || tk.Kind != test.expectKinds[i] {
@@ -390,7 +390,7 @@ func TestLexBegin(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.input, func(t *testing.T) {
 			lexer := withState(test.input, lexBegin)
-			go lexer.Run()
+			go lexer.Lex()
 			tk := lexer.NextToken()
 			for i := 0; tk != nil; i++ {
 				if tk.Value != test.expectValue[i] || tk.Kind != test.expectKind[i] {

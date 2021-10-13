@@ -11,7 +11,10 @@ func parseColumnExprs(tokens *token.Stream) ([]*ast.Expr, error) {
 	if tk := tokens.Next(); token.NotKind(tk, token.KindIdentifier) {
 		return nil, token.Error(tk, "invalid column name", "<identifier>")
 	} else {
-		expr = append(expr, &ast.Expr{Kind: ast.KindColumn, Body: tk.Value})
+		expr = append(expr, &ast.Expr{Kind: ast.KindColumn, Body: &ast.ExprBody{
+			Raw:  tk.Value,
+			Kind: tk.Kind,
+		}})
 	}
 
 	for tk := tokens.Peek(); token.NewSymbol(token.COMMA).Equals(tk); tk = tokens.Peek() {
@@ -19,7 +22,10 @@ func parseColumnExprs(tokens *token.Stream) ([]*ast.Expr, error) {
 		if tk = tokens.Next(); token.NotKind(tk, token.KindIdentifier) {
 			return nil, token.Error(tk, "invalid column name", "<identifier>")
 		} else {
-			expr = append(expr, &ast.Expr{Kind: ast.KindColumn, Body: tk.Value})
+			expr = append(expr, &ast.Expr{Kind: ast.KindColumn, Body: &ast.ExprBody{
+				Raw:  tk.Value,
+				Kind: tk.Kind,
+			}})
 		}
 	}
 
@@ -32,7 +38,10 @@ func parseLiteralExprs(tokens *token.Stream) ([]*ast.Expr, error) {
 	if tk := tokens.Next(); token.NotKind(tk, token.KindString, token.KindNumeric) {
 		return nil, token.Error(tk, "not values", "<string|numeric>")
 	} else {
-		expr = append(expr, &ast.Expr{Kind: ast.KindLiteral, Body: tk.Value})
+		expr = append(expr, &ast.Expr{Kind: ast.KindLiteral, Body: &ast.ExprBody{
+			Raw:  tk.Value,
+			Kind: tk.Kind,
+		}})
 	}
 
 	for tk := tokens.Peek(); token.NewSymbol(token.COMMA).Equals(tk); tk = tokens.Peek() {
@@ -40,7 +49,10 @@ func parseLiteralExprs(tokens *token.Stream) ([]*ast.Expr, error) {
 		if tk = tokens.Next(); token.NotKind(tk, token.KindString, token.KindNumeric) {
 			return nil, token.Error(tk, "not values", "<string|numeric>")
 		} else {
-			expr = append(expr, &ast.Expr{Kind: ast.KindLiteral, Body: tk.Value})
+			expr = append(expr, &ast.Expr{Kind: ast.KindLiteral, Body: &ast.ExprBody{
+				Raw:  tk.Value,
+				Kind: tk.Kind,
+			}})
 		}
 	}
 
