@@ -1,4 +1,4 @@
-package server
+package main
 
 import (
 	"bufio"
@@ -21,11 +21,11 @@ type Server struct {
 
 func New(host string, port uint16) (s *Server) {
 	s = &Server{
-		Engine: new(backend.Engine),
-	}
-	s.Addr = &net.TCPAddr{
-		IP:   net.ParseIP(HOST),
-		Port: PORT,
+		Engine: backend.Setup(),
+		Addr: &net.TCPAddr{
+			IP:   net.ParseIP(HOST),
+			Port: PORT,
+		},
 	}
 	return s
 }
@@ -49,11 +49,11 @@ func (s *Server) Run() {
 		if err != nil {
 			log.Fatalln(err)
 		}
-		go s.Handle(context.TODO(), conn)
+		go s.HandleRepl(context.TODO(), conn)
 	}
 }
 
-func (s *Server) Handle(ctx context.Context, conn *net.TCPConn) {
+func (s *Server) HandleRepl(ctx context.Context, conn *net.TCPConn) {
 	defer func(conn *net.TCPConn) {
 		err := conn.Close()
 		if err != nil {
@@ -65,6 +65,10 @@ func (s *Server) Handle(ctx context.Context, conn *net.TCPConn) {
 		panic(err)
 	}
 	res, err := s.Engine.Execute(ctx, str)
+	if err != nil {
+		log.Println("failed to execute query:", err)
+		return
+	}
 	resp := res.String()
 	_, err = conn.Write([]byte(resp))
 	if err != nil {
