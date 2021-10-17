@@ -21,9 +21,9 @@ func (r Result) String() string {
 	for i := 0; i < width; i++ {
 		sb.WriteString("=")
 	}
-	sb.WriteString("\n")
 
 	for _, result := range r.Rows {
+		sb.WriteString("\n")
 		sb.WriteString("|")
 		for i, cell := range result {
 			typ := r.Columns[i].Type
@@ -36,7 +36,6 @@ func (r Result) String() string {
 			}
 			sb.WriteString(fmt.Sprintf(" %s | ", s))
 		}
-		sb.WriteString("\n")
 	}
 	return sb.String()
 }
