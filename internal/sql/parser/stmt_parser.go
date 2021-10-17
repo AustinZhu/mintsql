@@ -5,10 +5,10 @@ import (
 	"mintsql/internal/sql/token"
 )
 
-func parseStmt(stmts ast.Ast, tokens *token.Stream) error {
+func parseStmt(tokens *token.Stream) (*ast.Stmt, error) {
 	init := tokens.Peek()
 	if init.Kind != token.KindKeyword {
-		return token.Error(init, "not a keyword", token.SELECT, token.INSERT, token.CREATE)
+		return nil, token.Error(init, "not a keyword", token.SELECT, token.INSERT, token.CREATE)
 	}
 
 	var s *ast.Stmt
@@ -21,14 +21,13 @@ func parseStmt(stmts ast.Ast, tokens *token.Stream) error {
 	} else if token.NewKeyword(token.INSERT).Equals(init) {
 		s, err = parseInsertStmt(tokens)
 	} else {
-		return token.Error(init, "unrecognized keyword", token.SELECT, token.INSERT, token.CREATE)
+		return nil, token.Error(init, "unrecognized keyword", token.SELECT, token.INSERT, token.CREATE)
 	}
 
 	if err != nil {
-		return err
+		return nil, err
 	}
-	stmts.Add(s)
-	return nil
+	return s, nil
 }
 
 func parseSelectStmt(tokens *token.Stream) (*ast.Stmt, error) {

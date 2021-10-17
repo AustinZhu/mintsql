@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"mintsql/internal/backend"
+	"mintsql/internal/store/table"
 	"net"
 	"strconv"
 )
@@ -83,7 +84,7 @@ func (s *Server) HandleRepl(ctx context.Context, conn *net.TCPConn) {
 			return
 		}
 
-		var res *backend.Result
+		var res *table.Result
 		var resp string
 		query := string(raw[:n])
 

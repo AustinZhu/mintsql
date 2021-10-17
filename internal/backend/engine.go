@@ -3,6 +3,7 @@ package backend
 import (
 	"context"
 	"mintsql/internal/sql/parser"
+	"mintsql/internal/store/table"
 )
 
 type Engine struct {
@@ -26,7 +27,7 @@ func Setup() *Engine {
 	}
 }
 
-func (e *Engine) Execute(ctx context.Context, raw string) (*Result, error) {
+func (e *Engine) Execute(ctx context.Context, raw string) (*table.Result, error) {
 	res, err := e.Lang.Process(ctx, raw)
 	if err != nil {
 		return nil, err

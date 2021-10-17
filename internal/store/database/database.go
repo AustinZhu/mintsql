@@ -1,12 +1,15 @@
-package store
+package database
 
-import "fmt"
+import (
+	"fmt"
+	"mintsql/internal/store/table"
+)
 
 type Database struct {
-	Tables map[string]*Table
+	Tables map[string]*table.Table
 }
 
-func (db *Database) AddTable(name string, tb *Table) error {
+func (db *Database) addTable(name string, tb *table.Table) error {
 	if _, exists := db.Tables[name]; exists {
 		return fmt.Errorf("table '%s' already exists", name)
 	}
@@ -14,14 +17,14 @@ func (db *Database) AddTable(name string, tb *Table) error {
 	return nil
 }
 
-func (db *Database) GetTable(name string) (*Table, error) {
+func (db *Database) getTable(name string) (*table.Table, error) {
 	if tb, exists := db.Tables[name]; exists {
 		return tb, nil
 	}
 	return nil, fmt.Errorf("table '%s' does not exist", name)
 }
 
-func (db *Database) RemoveTable(name string) error {
+func (db *Database) removeTable(name string) error {
 	if _, exists := db.Tables[name]; exists {
 		delete(db.Tables, name)
 		return nil
@@ -30,5 +33,5 @@ func (db *Database) RemoveTable(name string) error {
 }
 
 func NewDatabase() *Database {
-	return &Database{Tables: make(map[string]*Table)}
+	return &Database{Tables: make(map[string]*table.Table)}
 }

@@ -21,13 +21,14 @@ func NewFromFile(path string) *Parser {
 	}
 }
 
-func (p *Parser) Parse(src string) (ast ast.Ast, err error) {
+func (p *Parser) Parse(src string) (res ast.Ast, err error) {
 	p.Lexer = lexer.New(src)
 	go p.Lexer.Lex()
 
 	tokens := token.NewStream()
 	delimiter := token.NewSymbol(token.SEMICOLON)
 
+	res = ast.New()
 	for tk := p.Lexer.NextToken(); token.NotEnd(tk); tokens = token.NewStream() {
 		for ; token.NotEnd(tk); tk = p.Lexer.NextToken() {
 			tokens.Add(tk)
@@ -35,9 +36,11 @@ func (p *Parser) Parse(src string) (ast ast.Ast, err error) {
 				break
 			}
 		}
-		if err = parseStmt(ast, tokens); err != nil {
+		s, err := parseStmt(tokens)
+		if err != nil {
 			return nil, err
 		}
+		res.Add(s)
 		tk = p.Lexer.NextToken()
 	}
 	return

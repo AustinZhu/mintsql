@@ -14,9 +14,9 @@ func (a *Ast) Add(stmt *Stmt) {
 	*a = append(*a, stmt)
 }
 
-func New() *Ast {
+func New() Ast {
 	stmts := make(Ast, 0)
-	return &stmts
+	return stmts
 }
 
 type Stmt struct {
