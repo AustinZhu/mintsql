@@ -41,7 +41,7 @@ func New(host string, port string) *Client {
 
 func (c *Client) Run() {
 	var err error
-	c.Conn, err = net.DialTCP("tcp", nil, c.Addr)
+	c.Conn, err = net.DialTCP(PROTOCOL, nil, c.Addr)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)

@@ -32,6 +32,6 @@ func (db *Database) removeTable(name string) error {
 	return fmt.Errorf("table '%s' does not exist", name)
 }
 
-func NewDatabase() *Database {
+func New() *Database {
 	return &Database{Tables: make(map[string]*table.Table)}
 }

@@ -31,6 +31,6 @@ func (sp *StoreProcessor) Process(ctx context.Context, stmts ast.Ast) (*table.Re
 }
 
 func (sp *StoreProcessor) Load() error {
-	sp.db = database.NewDatabase()
+	sp.db = database.New()
 	return nil
 }
