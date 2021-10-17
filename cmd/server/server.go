@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/google/uuid"
 	"log"
 	"mintsql/internal/backend"
 	"mintsql/internal/store/table"
@@ -51,7 +52,7 @@ func (s *Server) Run() {
 	defer func(l *net.TCPListener) {
 		err := l.Close()
 		if err != nil {
-			log.Println(err)
+			return
 		}
 	}(l)
 
@@ -60,10 +61,11 @@ func (s *Server) Run() {
 		conn, err := l.AcceptTCP()
 		log.Printf("Accepted incoming connection on %s", conn.RemoteAddr())
 		if err != nil {
-			log.Fatalln(err)
-			return
+			log.Println(err)
+			continue
 		}
-		go s.HandleRepl(context.TODO(), conn)
+
+		go s.HandleRepl(context.Background(), conn)
 	}
 }
 
@@ -84,13 +86,15 @@ func (s *Server) HandleRepl(ctx context.Context, conn *net.TCPConn) {
 			return
 		}
 
+		ctx = context.WithValue(context.Background(), "uuid", uuid.New())
+		ctx = context.WithValue(ctx, "addr", conn.RemoteAddr())
+
 		var res *table.Result
 		var resp string
 		query := string(raw[:n])
 
 		res, err = s.Engine.Execute(ctx, query)
 		if err != nil {
-			log.Println("Failed to execute query:", err)
 			resp = err.Error()
 		} else if res == nil {
 			resp = "ok"

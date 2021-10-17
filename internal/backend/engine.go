@@ -2,8 +2,10 @@ package backend
 
 import (
 	"context"
+	"log"
 	"mintsql/internal/sql/parser"
 	"mintsql/internal/store/table"
+	"time"
 )
 
 type Engine struct {
@@ -27,10 +29,20 @@ func Setup() *Engine {
 	}
 }
 
-func (e *Engine) Execute(ctx context.Context, raw string) (*table.Result, error) {
-	res, err := e.Lang.Process(ctx, raw)
+func (e *Engine) Execute(ctx context.Context, raw string) (res *table.Result, err error) {
+	log.Println("Starting execution for request:", ctx.Value("uuid"))
+	start := time.Now()
+	defer func() {
+		if err != nil {
+			log.Printf("(%s) Execution failed: %s\n", ctx.Value("uuid"), err.Error())
+			return
+		}
+		log.Printf("(%s) Execution completed: %s elapsed\n", ctx.Value("uuid"), time.Since(start))
+	}()
+
+	ast, err := e.Lang.Process(ctx, raw)
 	if err != nil {
 		return nil, err
 	}
-	return e.Store.Process(ctx, res)
+	return e.Store.Process(ctx, ast)
 }

@@ -36,6 +36,7 @@ func (db *Database) Insert(stmt *ast.InsertStmt) error {
 			return fmt.Errorf("expect values")
 		}
 		b := v.Body
+		row[i] = table.FromString(b.Raw, table.Int)
 		switch b.Kind {
 		case token.KindNumeric:
 			row[i] = table.FromString(b.Raw, table.Int)

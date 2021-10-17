@@ -92,13 +92,6 @@ func (t Token) String() string {
 	}
 }
 
-func Error(t *Token, msg string, expect ...interface{}) error {
-	if t == nil {
-		return fmt.Errorf("error: missing token, expected %s", expect)
-	}
-	return fmt.Errorf("%s: error: %s, expected %s, got '%s'", t.Location, msg, expect, t.Value)
-}
-
 func NewSymbol(val symbol) *Token {
 	return &Token{
 		Kind:  KindSymbol,
