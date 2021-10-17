@@ -33,7 +33,7 @@ type Token struct {
 }
 
 func (t *Token) Equals(tk *Token) bool {
-	if tk == nil && t.Kind != tk.Kind {
+	if tk == nil || t.Kind != tk.Kind {
 		return false
 	}
 	if t.Kind == KindKeyword && strings.ToLower(t.Value) == strings.ToLower(tk.Value) {
@@ -43,7 +43,7 @@ func (t *Token) Equals(tk *Token) bool {
 }
 
 func (t *Token) NotEquals(tk *Token) bool {
-	if tk == nil && t.Kind != tk.Kind {
+	if tk == nil || t.Kind != tk.Kind {
 		return true
 	}
 	if t.Kind == KindKeyword && strings.ToLower(t.Value) == strings.ToLower(tk.Value) {
@@ -94,9 +94,9 @@ func (t Token) String() string {
 
 func Error(t *Token, msg string, expect ...interface{}) error {
 	if t == nil {
-		return fmt.Errorf("error: missing token, expected %s", expect)
+		return fmt.Errorf("error: missing token, expected '%s'", expect)
 	}
-	return fmt.Errorf("%s: error: %s, expected %s, got %s", t.Location, msg, expect, t.Value)
+	return fmt.Errorf("%s: error: %s, expected '%s', got '%s'", t.Location, msg, expect, t.Value)
 }
 
 func NewSymbol(val symbol) *Token {
@@ -123,7 +123,7 @@ func (ts *Stream) Add(token *Token) {
 }
 
 func (ts *Stream) Next() (t *Token) {
-	if ts.cur >= len(ts.stream) {
+	if ts.cur+1 >= len(ts.stream) {
 		return nil
 	}
 	ts.cur++

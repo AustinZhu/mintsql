@@ -98,13 +98,13 @@ func TestParseInsertStmt(t *testing.T) {
 		t.Run(test.input, func(t *testing.T) {
 			l := lexer.New(test.input)
 			tokens := extractTokens(l)
-			selectStmt, err := parseInsertStmt(tokens)
+			insertStmt, err := parseInsertStmt(tokens)
 			if err != nil != test.isError {
 				t.Error(err)
 				return
 			}
-			if diff := cmp.Diff(test.expectedAst, selectStmt); diff != "" {
-				t.Errorf("SelectStmt mismatch (-want +got):\n%s", diff)
+			if diff := cmp.Diff(test.expectedAst, insertStmt); diff != "" {
+				t.Errorf("InsertStmt mismatch (-want +got):\n%s", diff)
 				return
 			}
 			return
@@ -144,13 +144,13 @@ func TestParseCreateStmt(t *testing.T) {
 		t.Run(test.input, func(t *testing.T) {
 			l := lexer.New(test.input)
 			tokens := extractTokens(l)
-			selectStmt, err := parseCreateStmt(tokens)
+			createStmt, err := parseCreateStmt(tokens)
 			if err != nil != test.isError {
 				t.Error(err)
 				return
 			}
-			if diff := cmp.Diff(test.expectedAst, selectStmt); diff != "" {
-				t.Errorf("SelectStmt mismatch (-want +got):\n%s", diff)
+			if diff := cmp.Diff(test.expectedAst, createStmt); diff != "" {
+				t.Errorf("CreateStmt mismatch (-want +got):\n%s", diff)
 				return
 			}
 			return

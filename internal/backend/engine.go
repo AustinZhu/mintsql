@@ -15,6 +15,7 @@ func Setup() *Engine {
 		Parser: new(parser.Parser),
 	}
 	store := new(StoreProcessor)
+
 	err := store.Load()
 	if err != nil {
 		panic(err)

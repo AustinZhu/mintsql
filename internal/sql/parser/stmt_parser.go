@@ -11,26 +11,24 @@ func parseStmt(stmts ast.Ast, tokens *token.Stream) error {
 		return token.Error(init, "not a keyword", token.SELECT, token.INSERT, token.CREATE)
 	}
 
+	var s *ast.Stmt
+	var err error
+
 	if token.NewKeyword(token.SELECT).Equals(init) {
-		s, err := parseSelectStmt(tokens)
-		if err != nil {
-			return err
-		}
-		stmts.Add(s)
+		s, err = parseSelectStmt(tokens)
 	} else if token.NewKeyword(token.CREATE).Equals(init) {
-		s, err := parseCreateStmt(tokens)
-		if err != nil {
-			return err
-		}
-		stmts.Add(s)
+		s, err = parseCreateStmt(tokens)
 	} else if token.NewKeyword(token.INSERT).Equals(init) {
-		s, err := parseInsertStmt(tokens)
-		if err != nil {
-			return err
-		}
-		stmts.Add(s)
+		s, err = parseInsertStmt(tokens)
+	} else {
+		return token.Error(init, "unrecognized keyword", token.SELECT, token.INSERT, token.CREATE)
 	}
-	return token.Error(init, "unrecognized keyword", token.SELECT, token.INSERT, token.CREATE)
+
+	if err != nil {
+		return err
+	}
+	stmts.Add(s)
+	return nil
 }
 
 func parseSelectStmt(tokens *token.Stream) (*ast.Stmt, error) {
@@ -39,6 +37,7 @@ func parseSelectStmt(tokens *token.Stream) (*ast.Stmt, error) {
 	if tk := tokens.Next(); !token.NewKeyword(token.SELECT).Equals(tk) {
 		return nil, token.Error(tk, "not a select statement", token.SELECT)
 	}
+
 	stmt.Kind = ast.KindSelect
 	stmt.SelectStmt = &ast.SelectStmt{}
 
@@ -78,6 +77,7 @@ func parseCreateStmt(tokens *token.Stream) (*ast.Stmt, error) {
 	if tk := tokens.Next(); token.NewKeyword(token.TABLE).NotEquals(tk) {
 		return nil, token.Error(tk, "missing keyword", token.TABLE)
 	}
+
 	stmt.Kind = ast.KindCreateTable
 	stmt.CreateTableStmt = &ast.CreateTableStmt{}
 
@@ -118,6 +118,7 @@ func parseInsertStmt(tokens *token.Stream) (*ast.Stmt, error) {
 	if tk := tokens.Next(); token.NewKeyword(token.INTO).NotEquals(tk) {
 		return nil, token.Error(tk, "missing keyword", token.INTO)
 	}
+
 	stmt.Kind = ast.KindInsert
 	stmt.InsertStmt = &ast.InsertStmt{}
 

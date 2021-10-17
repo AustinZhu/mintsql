@@ -3,19 +3,18 @@ package main
 import (
 	"log"
 	"os"
-	"strconv"
 )
 
-func main() {
-	var server *Server
+func init() {
 	if len(os.Args) > 2 {
-		host, port := os.Args[1], os.Args[2]
-		p, err := strconv.Atoi(port)
-		if err != nil {
-			log.Fatalln("not a valid port number", err)
-		}
-		server = New(host, uint16(p))
+		host, port = os.Args[1], os.Args[2]
+		sqlServer = New(host, port)
+	} else {
+		sqlServer = New(HOST, PORT)
 	}
-	server = New(HOST, PORT)
-	server.Run()
+	log.Printf("Welcome to mintsql Server.")
+}
+
+func main() {
+	sqlServer.Run()
 }

@@ -46,6 +46,7 @@ func lexNumeric(l *Lexer) LexFn {
 	} else {
 		return l.err("bad numeric")
 	}
+
 	if l.acceptOneIn("eE") < 0 {
 		l.emit(token.KindNumeric)
 		return lexBegin

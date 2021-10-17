@@ -74,11 +74,14 @@ func (r Result) String() string {
 
 func (sp *StoreProcessor) createTable(stmt *ast.CreateTableStmt) error {
 	cols := make([]*store.Column, len(stmt.Cols))
+
 	for i, c := range stmt.Cols {
 		cols[i] = store.NewColumn(c.Name, c.DataType)
 	}
+
 	table := store.NewTable(cols)
 	err := sp.db.AddTable(stmt.Name, table)
+
 	if err != nil {
 		return err
 	}
@@ -90,7 +93,9 @@ func (sp *StoreProcessor) insert(stmt *ast.InsertStmt) error {
 	if err != nil {
 		return err
 	}
+
 	row := make([]store.Cell, len(stmt.Values))
+
 	for i, v := range stmt.Values {
 		if v.Kind != ast.KindLiteral {
 			return fmt.Errorf("expect values")
@@ -105,6 +110,7 @@ func (sp *StoreProcessor) insert(stmt *ast.InsertStmt) error {
 			return fmt.Errorf("unclassified types")
 		}
 	}
+
 	tb.Rows = append(tb.Rows, row)
 	return nil
 }
@@ -114,10 +120,12 @@ func (sp *StoreProcessor) selects(stmt *ast.SelectStmt) (*Result, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	results := &Result{
 		Columns: make([]store.Column, len(stmt.Items)),
 		Rows:    make([][]store.Cell, 0),
 	}
+
 	idx := make([]int, len(stmt.Items))
 	for i, c := range stmt.Items {
 		if c.Kind != ast.KindColumn {
@@ -129,6 +137,7 @@ func (sp *StoreProcessor) selects(stmt *ast.SelectStmt) (*Result, error) {
 			}
 		}
 	}
+
 	for i, j := range idx {
 		results.Columns[i] = *tb.Columns[j]
 		results.Rows[i] = tb.Rows[j]
