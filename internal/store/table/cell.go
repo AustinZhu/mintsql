@@ -6,6 +6,13 @@ import (
 	"strconv"
 )
 
+type DataType uint
+
+const (
+	Int DataType = iota
+	Text
+)
+
 type Cell []byte
 
 func (c Cell) AsInt() (i int32) {
