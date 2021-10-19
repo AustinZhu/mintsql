@@ -404,3 +404,13 @@ func TestLexBegin(t *testing.T) {
 		})
 	}
 }
+
+func withState(src string, fn LexFn) *Lexer {
+	return &Lexer{
+		input:    src,
+		tokens:   make(chan *token.Token, len(src)/2),
+		state:    fn,
+		cursor:   cursor{},
+		location: token.Location{Line: 1},
+	}
+}

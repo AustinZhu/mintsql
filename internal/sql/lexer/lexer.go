@@ -1,7 +1,6 @@
 package lexer
 
 import (
-	"errors"
 	"mintsql/internal/sql/token"
 	"strings"
 	"unicode/utf8"
@@ -25,7 +24,7 @@ type Lexer struct {
 	input  string
 	tokens chan *token.Token
 	state  LexFn
-	Error  error
+	ok     bool
 
 	cursor
 	location token.Location
@@ -67,6 +66,12 @@ func (l *Lexer) next() (res rune) {
 	}
 	res, l.cursor.width = utf8.DecodeRuneInString(l.input[l.pos:])
 	l.cursor.pos += l.cursor.width
+	if res == NEWLINE {
+		l.location.Line++
+		l.cursor.lastLineLength = l.location.Column
+		l.location.Column = 1
+		return
+	}
 	l.location.Column++
 	return
 }
@@ -119,9 +124,8 @@ func (l *Lexer) acceptManyIn(domain string) (len int) {
 	return
 }
 
-func (l *Lexer) err(msg string) LexFn {
+func (l *Lexer) err() LexFn {
 	l.emit(token.KindError)
-	l.Error = errors.New(msg)
 	return nil
 }
 
@@ -138,7 +142,7 @@ func (l *Lexer) try(funcs ...LexFn) {
 		lex := *l
 		lex.state = f
 		go lex.Lex()
-		if l.Error == nil {
+		if !l.ok {
 			*l = lex
 			break
 		}
@@ -158,16 +162,6 @@ func New(src string) *Lexer {
 		input:    src,
 		tokens:   make(chan *token.Token, len(src)/2),
 		state:    lexBegin,
-		cursor:   cursor{},
-		location: token.Location{Line: 1},
-	}
-}
-
-func withState(src string, fn LexFn) *Lexer {
-	return &Lexer{
-		input:    src,
-		tokens:   make(chan *token.Token, len(src)/2),
-		state:    fn,
 		cursor:   cursor{},
 		location: token.Location{Line: 1},
 	}

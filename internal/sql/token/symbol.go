@@ -10,3 +10,7 @@ const (
 	RPAREN    symbol = ")"
 	Symbols   string = ";*,()"
 )
+
+func (s symbol) String() string {
+	return string(s)
+}

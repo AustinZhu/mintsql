@@ -1,7 +1,6 @@
 package database
 
 import (
-	"fmt"
 	"mintsql/internal/sql/ast"
 	"mintsql/internal/sql/token"
 	"mintsql/internal/store/table"
@@ -33,7 +32,7 @@ func (db *Database) Insert(stmt *ast.InsertStmt) error {
 
 	for i, v := range stmt.Values {
 		if v.Kind != ast.KindLiteral {
-			return fmt.Errorf("expect values")
+			return Error(IllegalValueError, stmt.Table, v.Body.Raw)
 		}
 		b := v.Body
 		switch b.Kind {
@@ -42,7 +41,7 @@ func (db *Database) Insert(stmt *ast.InsertStmt) error {
 		case token.KindString:
 			row[i] = table.FromString(b.Raw, table.Text)
 		default:
-			return fmt.Errorf("unclassified types")
+			return Error(NoSuchTypeError, stmt.Table, b.Raw)
 		}
 	}
 
@@ -64,7 +63,7 @@ func (db *Database) Selects(stmt *ast.SelectStmt) (*table.Result, error) {
 	idx := make([]int, len(stmt.Items))
 	for i, c := range stmt.Items {
 		if c.Kind != ast.KindColumn {
-			return nil, fmt.Errorf("expect columns")
+			return nil, Error(NoSuchColumnError, stmt.Table, c.Body.Raw)
 		}
 		for j, col := range tb.Columns {
 			if col.Name == c.Body.Raw {

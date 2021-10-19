@@ -99,7 +99,7 @@ func NewSymbol(val symbol) *Token {
 	}
 }
 
-func NewKeyword(val Keyword) *Token {
+func NewKeyword(val keyword) *Token {
 	return &Token{
 		Kind:  KindKeyword,
 		Value: string(val),

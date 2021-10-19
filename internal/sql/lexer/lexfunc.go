@@ -10,7 +10,6 @@ func lexBegin(l *Lexer) LexFn {
 	for {
 		switch nxt := l.peek(); {
 		case nxt == NEWLINE:
-			l.location.Line++
 			l.next()
 			l.ignore()
 		case unicode.IsSpace(nxt):
@@ -41,10 +40,10 @@ func lexNumeric(l *Lexer) LexFn {
 		l.acceptManyIn(digits)
 	} else if l.acceptOneIn(".") > 0 {
 		if l.acceptManyIn(digits) == 0 {
-			return l.err("bad numeric")
+			return l.err()
 		}
 	} else {
-		return l.err("bad numeric")
+		return l.err()
 	}
 
 	if l.acceptOneIn("eE") < 0 {
@@ -56,12 +55,12 @@ func lexNumeric(l *Lexer) LexFn {
 		l.emit(token.KindNumeric)
 		return lexBegin
 	}
-	return l.err("bad numeric")
+	return l.err()
 }
 
 func lexString(l *Lexer) LexFn {
 	if l.acceptOneIn("'\"") < 0 {
-		return l.err("bad string")
+		return l.err()
 	}
 	l.ignore()
 	for c := l.next(); !unicode.IsControl(c); c = l.next() {
@@ -83,12 +82,12 @@ func lexString(l *Lexer) LexFn {
 			return lexBegin
 		}
 	}
-	return l.err("bad string")
+	return l.err()
 }
 
 func lexIdentifier(l *Lexer) LexFn {
 	if l.acceptOneIf(func(r rune) bool { return r == '_' || unicode.IsLetter(r) }) < 0 {
-		return l.err("bad identifier")
+		return l.err()
 	}
 	l.acceptManyIf(func(r rune) bool { return r == '_' || unicode.IsLetter(r) || unicode.IsDigit(r) })
 	l.emit(token.KindIdentifier)
@@ -100,7 +99,7 @@ func lexSymbol(l *Lexer) LexFn {
 		l.emit(token.KindSymbol)
 		return lexBegin
 	}
-	return l.err("unrecognizable symbol")
+	return l.err()
 }
 
 func lexKeyword(l *Lexer) LexFn {

@@ -9,7 +9,7 @@ func parseColumnExprs(tokens *token.Stream) ([]*ast.Expr, error) {
 	expr := make([]*ast.Expr, 0)
 
 	if tk := tokens.Next(); token.NotKind(tk, token.KindIdentifier) {
-		return nil, Error(tk, "invalid column name", "<identifier>")
+		return nil, Error(InvalidNameError, tk)
 	} else {
 		expr = append(expr, &ast.Expr{Kind: ast.KindColumn, Body: &ast.ExprBody{
 			Raw:  tk.Value,
@@ -20,7 +20,7 @@ func parseColumnExprs(tokens *token.Stream) ([]*ast.Expr, error) {
 	for tk := tokens.Peek(); token.NewSymbol(token.COMMA).Equals(tk); tk = tokens.Peek() {
 		tk = tokens.Next()
 		if tk = tokens.Next(); token.NotKind(tk, token.KindIdentifier) {
-			return nil, Error(tk, "invalid column name", "<identifier>")
+			return nil, Error(InvalidNameError, tk)
 		} else {
 			expr = append(expr, &ast.Expr{Kind: ast.KindColumn, Body: &ast.ExprBody{
 				Raw:  tk.Value,
@@ -36,7 +36,7 @@ func parseLiteralExprs(tokens *token.Stream) ([]*ast.Expr, error) {
 	expr := make([]*ast.Expr, 0)
 
 	if tk := tokens.Next(); token.NotKind(tk, token.KindString, token.KindNumeric) {
-		return nil, Error(tk, "not values", "<string|numeric>")
+		return nil, Error(InvalidValueError, tk)
 	} else {
 		expr = append(expr, &ast.Expr{Kind: ast.KindLiteral, Body: &ast.ExprBody{
 			Raw:  tk.Value,
@@ -47,7 +47,7 @@ func parseLiteralExprs(tokens *token.Stream) ([]*ast.Expr, error) {
 	for tk := tokens.Peek(); token.NewSymbol(token.COMMA).Equals(tk); tk = tokens.Peek() {
 		tk = tokens.Next()
 		if tk = tokens.Next(); token.NotKind(tk, token.KindString, token.KindNumeric) {
-			return nil, Error(tk, "not values", "<string|numeric>")
+			return nil, Error(InvalidValueError, tk)
 		} else {
 			expr = append(expr, &ast.Expr{Kind: ast.KindLiteral, Body: &ast.ExprBody{
 				Raw:  tk.Value,
@@ -64,11 +64,11 @@ func parseColumnDefs(tokens *token.Stream) ([]*ast.ColumnDef, error) {
 
 	col := tokens.Next()
 	if token.NotKind(col, token.KindIdentifier) {
-		return nil, Error(col, "not a column name", "<identifier>")
+		return nil, Error(InvalidNameError, col)
 	}
 	dt := tokens.Next()
 	if token.NewKeyword(token.INT).NotEquals(dt) && token.NewKeyword(token.TEXT).NotEquals(dt) {
-		return nil, Error(dt, "not a datatype", "<datatype>")
+		return nil, Error(InvalidNameError, dt)
 	}
 	expr = append(expr, &ast.ColumnDef{Name: col.Value, DataType: dt.Value})
 
@@ -76,11 +76,11 @@ func parseColumnDefs(tokens *token.Stream) ([]*ast.ColumnDef, error) {
 		tk = tokens.Next()
 		col := tokens.Next()
 		if token.NotKind(col, token.KindIdentifier) {
-			return nil, Error(col, "not a column name", "<identifier>")
+			return nil, Error(InvalidNameError, col)
 		}
 		dt := tokens.Next()
 		if token.NewKeyword(token.INT).NotEquals(dt) && token.NewKeyword(token.TEXT).NotEquals(dt) {
-			return nil, Error(dt, "not a datatype", "<datatype>")
+			return nil, Error(InvalidNameError, dt)
 		}
 		expr = append(expr, &ast.ColumnDef{Name: col.Value, DataType: dt.Value})
 	}

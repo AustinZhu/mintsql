@@ -30,7 +30,7 @@ func (p *Parser) Parse(src string) (res ast.Ast, err error) {
 
 	res = ast.New()
 	for tk := p.Lexer.NextToken(); token.NotEnd(tk); tokens = token.NewStream() {
-		for ; token.NotEnd(tk); tk = p.Lexer.NextToken() {
+		for ; tk != nil; tk = p.Lexer.NextToken() {
 			tokens.Add(tk)
 			if tk.Equals(delimiter) {
 				break

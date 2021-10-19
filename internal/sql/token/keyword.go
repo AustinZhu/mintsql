@@ -1,19 +1,23 @@
 package token
 
-type Keyword string
+type keyword string
 
 const (
-	SELECT Keyword = "select"
-	FROM   Keyword = "from"
-	AS     Keyword = "as"
-	TABLE  Keyword = "table"
-	CREATE Keyword = "create"
-	INSERT Keyword = "insert"
-	INTO   Keyword = "into"
-	VALUES Keyword = "values"
-	INT    Keyword = "int"
-	TEXT   Keyword = "text"
+	SELECT keyword = "select"
+	FROM   keyword = "from"
+	AS     keyword = "as"
+	TABLE  keyword = "table"
+	CREATE keyword = "create"
+	INSERT keyword = "insert"
+	INTO   keyword = "into"
+	VALUES keyword = "values"
+	INT    keyword = "int"
+	TEXT   keyword = "text"
 )
+
+func (s keyword) String() string {
+	return string(s)
+}
 
 var Keywords = []string{
 	string(AS),
