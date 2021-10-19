@@ -6,11 +6,11 @@ import (
 )
 
 func init() {
-	if len(os.Args) > 2 {
-		host, port = os.Args[1], os.Args[2]
-		sqlServer = New(host, port)
+	if len(os.Args) > 1 {
+		port = os.Args[1]
+		sqlServer = New(port)
 	} else {
-		sqlServer = New(HOST, PORT)
+		sqlServer = New(PORT)
 	}
 	log.Printf("Welcome to mintsql Server.")
 }

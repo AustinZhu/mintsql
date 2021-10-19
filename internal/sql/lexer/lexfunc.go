@@ -29,6 +29,8 @@ func lexBegin(l *Lexer) LexFn {
 			l.next()
 			l.emit(token.KindEof)
 			return nil
+		default:
+			return l.err()
 		}
 	}
 }

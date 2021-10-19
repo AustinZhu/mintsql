@@ -11,14 +11,13 @@ import (
 )
 
 const (
-	HOST     = "127.0.0.1"
+	HOST     = "0.0.0.0"
 	PROTOCOL = "tcp"
 	PORT     = "7384"
 )
 
 var (
 	sqlServer *Server
-	host      string
 	port      string
 )
 
@@ -27,7 +26,7 @@ type Server struct {
 	Engine *backend.Engine
 }
 
-func New(host string, port string) (s *Server) {
+func New(port string) (s *Server) {
 	port_, err := strconv.Atoi(port)
 	if err != nil {
 		log.Fatalln("not a valid port number", err)
@@ -36,7 +35,7 @@ func New(host string, port string) (s *Server) {
 	s = &Server{
 		Engine: backend.Setup(),
 		Addr: &net.TCPAddr{
-			IP:   net.ParseIP(host),
+			IP:   net.ParseIP(HOST),
 			Port: port_,
 		},
 	}
