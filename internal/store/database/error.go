@@ -48,5 +48,6 @@ func Error(code int, table string, hint string) *StoreError {
 	return &StoreError{
 		Code:      code,
 		tableName: table,
+		hint:      hint,
 	}
 }
