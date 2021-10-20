@@ -65,5 +65,5 @@ ok
 > SELECT name, id FROM students;
 | name | id |
 ==============
-| Bob |  1 | 
+|  Bob |  1 | 
 ```
