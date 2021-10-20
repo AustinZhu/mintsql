@@ -55,6 +55,18 @@ func (db *Database) Selects(stmt *ast.SelectStmt) (*table.Result, error) {
 		return nil, err
 	}
 
+	if len(stmt.Items) == 1 && stmt.Items[0].Body.Raw == string(token.ASTERISK) {
+		results := &table.Result{
+			Columns: make([]table.Column, len(tb.Columns)),
+			Rows:    make([][]table.Cell, len(tb.Rows)),
+		}
+		for i, c := range tb.Columns {
+			results.Columns[i] = *c
+		}
+		results.Rows = tb.Rows
+		return results, nil
+	}
+
 	results := &table.Result{
 		Columns: make([]table.Column, len(stmt.Items)),
 		Rows:    make([][]table.Cell, len(tb.Rows)),

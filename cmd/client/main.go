@@ -12,7 +12,7 @@ func init() {
 	} else {
 		sqlClient = New(HOST, PORT)
 	}
-	fmt.Println("Welcome to mintsql Client.")
+	fmt.Println("Welcome to MintSQL Client.")
 }
 
 func main() {

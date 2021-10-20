@@ -6,6 +6,7 @@ import (
 	"net"
 	"os"
 	"strconv"
+	"strings"
 )
 
 const (
@@ -60,20 +61,25 @@ func (c *Client) Run() {
 		n, err := os.Stdin.Read(p)
 		if err != nil {
 			fmt.Println(err)
-			return
+			break
 		}
+		input := p[:n]
 
-		_, err = c.Conn.Write(p)
+		_, err = c.Conn.Write(input)
 		if err != nil {
 			fmt.Println(err)
-			return
+			break
+		}
+
+		if strings.TrimSpace(string(input)) == "\\quit" {
+			break
 		}
 
 		raw := make([]byte, 1024)
 		n, err = c.Conn.Read(raw)
 		if err != nil {
 			fmt.Println(err)
-			return
+			break
 		}
 		fmt.Println(string(raw[:n]))
 	}

@@ -7,6 +7,7 @@ import (
 	"mintsql/internal/backend"
 	"net"
 	"strconv"
+	"strings"
 )
 
 const (
@@ -28,7 +29,7 @@ type Server struct {
 func New(port string) (s *Server) {
 	port_, err := strconv.Atoi(port)
 	if err != nil {
-		log.Fatalln("not a valid port number", err)
+		log.Fatalln("invalid port number", err)
 	}
 
 	s = &Server{
@@ -81,18 +82,22 @@ func (s *Server) HandleRepl(ctx context.Context, conn *net.TCPConn) {
 		n, err := conn.Read(raw)
 		if err != nil {
 			log.Println(err)
-			return
+			break
 		}
 		query := string(raw[:n])
 
+		if strings.TrimSpace(query) == "\\quit" {
+			break
+		}
+
 		ctx = context.WithValue(context.Background(), "uuid", uuid.New())
-		ctx = context.WithValue(ctx, "addr", conn.RemoteAddr())
+		ctx = context.WithValue(ctx, "conn", conn)
 		res := s.Engine.Execute(ctx, query)
 
 		_, err = conn.Write([]byte(res.String()))
 		if err != nil {
 			log.Println(err)
-			return
+			break
 		}
 	}
 }

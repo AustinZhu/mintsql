@@ -12,7 +12,7 @@ func init() {
 	} else {
 		sqlServer = New(PORT)
 	}
-	log.Printf("Welcome to mintsql Server.")
+	log.Printf("Welcome to MintSQL Server.")
 }
 
 func main() {

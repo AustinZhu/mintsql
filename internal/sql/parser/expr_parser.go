@@ -8,13 +8,13 @@ import (
 func parseColumnExprs(tokens *token.Stream) ([]*ast.Expr, error) {
 	expr := make([]*ast.Expr, 0)
 
-	if tk := tokens.Next(); token.NotKind(tk, token.KindIdentifier) {
-		return nil, Error(InvalidNameError, tk)
-	} else {
+	if tk := tokens.Next(); token.NewSymbol(token.ASTERISK).Equals(tk) || token.IsKind(tk, token.KindIdentifier) {
 		expr = append(expr, &ast.Expr{Kind: ast.KindColumn, Body: &ast.ExprBody{
 			Raw:  tk.Value,
 			Kind: tk.Kind,
 		}})
+	} else {
+		return nil, Error(InvalidNameError, tk)
 	}
 
 	for tk := tokens.Peek(); token.NewSymbol(token.COMMA).Equals(tk); tk = tokens.Peek() {
