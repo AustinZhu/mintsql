@@ -18,7 +18,7 @@ Run the client:
 
 `make run-client`
 
-## Install
+## Installation
 
 Install the server:
 
