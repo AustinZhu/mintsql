@@ -5,7 +5,6 @@ import (
 	"github.com/google/uuid"
 	"log"
 	"mintsql/internal/backend"
-	"mintsql/internal/store/table"
 	"net"
 	"strconv"
 )
@@ -84,24 +83,13 @@ func (s *Server) HandleRepl(ctx context.Context, conn *net.TCPConn) {
 			log.Println(err)
 			return
 		}
+		query := string(raw[:n])
 
 		ctx = context.WithValue(context.Background(), "uuid", uuid.New())
 		ctx = context.WithValue(ctx, "addr", conn.RemoteAddr())
+		res := s.Engine.Execute(ctx, query)
 
-		var res *table.Result
-		var resp string
-		query := string(raw[:n])
-
-		res, err = s.Engine.Execute(ctx, query)
-		if err != nil {
-			resp = err.Error()
-		} else if res == nil {
-			resp = "ok"
-		} else {
-			resp = res.String()
-		}
-
-		_, err = conn.Write([]byte(resp))
+		_, err = conn.Write([]byte(res.String()))
 		if err != nil {
 			log.Println(err)
 			return

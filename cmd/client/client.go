@@ -28,7 +28,7 @@ type Client struct {
 func New(host string, port string) *Client {
 	port_, err := strconv.Atoi(port)
 	if err != nil {
-		log.Fatalln("not a valid port number", err)
+		log.Fatalln("invalid port number", err)
 	}
 	return &Client{
 		Addr: &net.TCPAddr{
