@@ -115,7 +115,16 @@ func TestToken_String(t *testing.T) {
 }
 
 func TestLocation_String(t *testing.T) {
-
+	loc := &Location{
+		Line:   10,
+		Column: 20,
+	}
+	t.Run("Location", func(t *testing.T) {
+		if loc.String() != "10:20" {
+			t.Error("error stringify location")
+		}
+		return
+	})
 }
 
 func TestIsKind(t *testing.T) {
