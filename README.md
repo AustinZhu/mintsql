@@ -39,7 +39,7 @@ The default port for MintSQL is 7384.
 
 ### Querying from the client console
 
-The query language is a subset of SQL. For now, MintSQL only support simple `CREATE|INSERT|SELECT` queries.
+The query language is a subset of SQL. For now, MintSQL only supports simple `CREATE|INSERT|SELECT` queries.
 
 To quit the client console, type `\quit`.
 

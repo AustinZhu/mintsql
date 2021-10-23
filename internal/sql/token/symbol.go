@@ -8,6 +8,13 @@ const (
 	COMMA     symbol = ","
 	LPAREN    symbol = "("
 	RPAREN    symbol = ")"
+	EQ        symbol = "="
+	LE        symbol = "<"
+	GE        symbol = ">"
+	ADD       symbol = "+"
+	SUB       symbol = "-"
+	MUL       symbol = "*"
+	DIV       symbol = "/"
 	Symbols   string = ";*,()"
 )
 

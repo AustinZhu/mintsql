@@ -5,6 +5,7 @@ type keyword string
 const (
 	SELECT keyword = "select"
 	FROM   keyword = "from"
+	WHERE  keyword = "where"
 	AS     keyword = "as"
 	TABLE  keyword = "table"
 	CREATE keyword = "create"
@@ -13,6 +14,10 @@ const (
 	VALUES keyword = "values"
 	INT    keyword = "int"
 	TEXT   keyword = "text"
+	OR     keyword = "or"
+	AND    keyword = "and"
+	TRUE   keyword = "true"
+	FALSE  keyword = "false"
 )
 
 func (s keyword) String() string {
