@@ -43,13 +43,7 @@ func (t *Token) Equals(tk *Token) bool {
 }
 
 func (t *Token) NotEquals(tk *Token) bool {
-	if tk == nil || t.Kind != tk.Kind {
-		return true
-	}
-	if t.Kind == KindKeyword && strings.ToLower(t.Value) == strings.ToLower(tk.Value) {
-		return false
-	}
-	return t.Value != tk.Value
+	return !t.Equals(tk)
 }
 
 func IsKind(tk *Token, kinds ...Kind) (ok bool) {
@@ -63,14 +57,7 @@ func IsKind(tk *Token, kinds ...Kind) (ok bool) {
 }
 
 func NotKind(tk *Token, kinds ...Kind) (ok bool) {
-	if tk == nil {
-		return true
-	}
-	ok = true
-	for _, k := range kinds {
-		ok = ok && k != tk.Kind
-	}
-	return
+	return !IsKind(tk, kinds...)
 }
 
 func IsEnd(tk *Token) bool {
@@ -78,7 +65,7 @@ func IsEnd(tk *Token) bool {
 }
 
 func NotEnd(tk *Token) bool {
-	return tk != nil && tk.Kind != KindEof
+	return !IsEnd(tk)
 }
 
 func (t Token) String() string {

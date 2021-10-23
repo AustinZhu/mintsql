@@ -50,7 +50,7 @@ func (e *SyntaxError) fmtSyntaxError(msg string) string {
 	if e.tk == nil {
 		return fmt.Sprintf("syntax error: missing token%s", exp)
 	}
-	return fmt.Sprintf("syntax error @%s: %s%s, got '%s'", e.tk.Location, msg, exp, e.tk.Value)
+	return fmt.Sprintf("syntax error @%s: %s%s, got %s", e.tk.Location, msg, exp, e.tk)
 }
 
 func Error(code int, get *token.Token, expect ...fmt.Stringer) *SyntaxError {
