@@ -2,6 +2,7 @@
 
 [![Go](https://github.com/AustinZhu/mintsql/actions/workflows/go.yml/badge.svg)](https://github.com/AustinZhu/mintsql/actions/workflows/go.yml)
 [![Docker](https://github.com/AustinZhu/mintsql/actions/workflows/docker.yml/badge.svg)](https://github.com/AustinZhu/mintsql/actions/workflows/docker.yml)
+[![codecov](https://codecov.io/gh/AustinZhu/mintsql/branch/master/graph/badge.svg?token=4Y2VML1B2A)](https://codecov.io/gh/AustinZhu/mintsql)
 
 ![](https://i.ibb.co/CPZ0VMc/mint-logo.png)
 MintSQL is a lightweight SQL database written in Go that supports basic database CRUD operations.
