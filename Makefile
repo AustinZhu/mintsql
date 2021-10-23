@@ -22,7 +22,7 @@ install-client: mod
 
 .PHONY: test
 test:
-	go test -v ./... -cover
+	go test -v ./... -race -coverprofile=coverage.txt -covermode=atomic
 
 .PHONY: run-server
 run-server:
