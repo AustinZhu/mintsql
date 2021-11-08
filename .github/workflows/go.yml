@@ -3,8 +3,18 @@ name: Go
 on:
   push:
     branches: [ master ]
+    paths:
+      - "**.go"
+      - "**/go.mod"
+      - "**/go.sum"
+      - ".github/**.yml"
   pull_request:
     branches: [ master ]
+    paths:
+      - "**.go"
+      - "**/go.mod"
+      - "**/go.sum"
+      - ".github/**.yml"
 
 jobs:
   build:
