@@ -7,6 +7,12 @@
 ![](https://i.ibb.co/CPZ0VMc/mint-logo.png)
 MintSQL is a lightweight SQL database written in Go that supports basic database CRUD operations.
 
+## Prerequisites
+Make sure you have the following installed:
+
+- Go 1.17
+- Docker (optional)
+
 ## Getting Started
 Run the server (on local):
 
