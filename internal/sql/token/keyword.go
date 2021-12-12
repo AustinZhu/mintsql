@@ -35,4 +35,9 @@ var Keywords = []string{
 	string(TABLE),
 	string(TEXT),
 	string(VALUES),
+	string(WHERE),
+	string(AND),
+	string(OR),
+	string(TRUE),
+	string(FALSE),
 }

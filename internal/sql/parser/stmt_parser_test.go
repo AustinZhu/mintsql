@@ -55,7 +55,6 @@ func TestParseSelectStmt(t *testing.T) {
 				t.Errorf("SelectStmt mismatch (-want +got):\n%s", diff)
 				return
 			}
-			return
 		})
 	}
 }
@@ -107,7 +106,6 @@ func TestParseInsertStmt(t *testing.T) {
 				t.Errorf("InsertStmt mismatch (-want +got):\n%s", diff)
 				return
 			}
-			return
 		})
 	}
 }
@@ -153,7 +151,6 @@ func TestParseCreateStmt(t *testing.T) {
 				t.Errorf("CreateStmt mismatch (-want +got):\n%s", diff)
 				return
 			}
-			return
 		})
 	}
 }

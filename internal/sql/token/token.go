@@ -36,7 +36,7 @@ func (t *Token) Equals(tk *Token) bool {
 	if tk == nil || t.Kind != tk.Kind {
 		return false
 	}
-	if t.Kind == KindKeyword && strings.ToLower(t.Value) == strings.ToLower(tk.Value) {
+	if t.Kind == KindKeyword && strings.EqualFold(t.Value, tk.Value) {
 		return true
 	}
 	return t.Value == tk.Value

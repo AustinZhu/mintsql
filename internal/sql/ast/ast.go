@@ -15,8 +15,7 @@ func (a *Ast) Add(stmt *Stmt) {
 }
 
 func New() Ast {
-	stmts := make(Ast, 0)
-	return stmts
+	return make(Ast, 0)
 }
 
 type Stmt struct {

@@ -93,7 +93,6 @@ func TestParse(t *testing.T) {
 				t.Errorf("Parse mismatch (-want +got):\n%s", diff)
 				return
 			}
-			return
 		})
 	}
 }
